@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting Master — Study Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070d0f;--surface:#0e1a1e;--surface2:#152028;--green:#00ff9d;--green-glow:rgba(0,255,157,0.15);--green-faint:rgba(0,255,157,0.06);--gold:#f0c040;--cyan:#00d4ff;--red:#ff4466;--white:#e8f4f0;--gray:#4a6670;--gray2:#2a3d45;--text:#c8ddd8;--border:rgba(0,255,157,0.12);}
+*{margin:0;padding:0;box-sizing:border-box;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:#00c47a;border-radius:3px;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:58px;background:rgba(7,13,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:6px;}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--green);margin-right:auto;letter-spacing:.05em;text-shadow:0 0 12px var(--green);cursor:pointer;}
+.nav-logo span{color:var(--gold);}
+.nav-btn{background:none;border:1px solid transparent;color:var(--gray);font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.08em;padding:7px 14px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.nav-btn:hover{color:var(--green);border-color:var(--border);}
+.nav-btn.active{color:var(--green);border-color:var(--green);background:var(--green-faint);text-shadow:0 0 8px var(--green);}
+.page{display:none;padding-top:58px;min-height:100vh;}.page.active{display:block;}
+#lesson-view{display:none;padding-top:58px;min-height:100vh;}#lesson-view.active{display:block;}
+
+/* HERO */
+.hero{min-height:calc(100vh - 58px);display:grid;grid-template-columns:1fr 460px;align-items:center;gap:48px;padding:60px 48px;position:relative;overflow:hidden;}
+.hbg1{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,157,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,157,0.04) 1px,transparent 1px);background-size:48px 48px;}
+.hbg2{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 70% 50%,rgba(0,255,157,0.04) 0%,transparent 70%);}
+.hero-left{position:relative;}
+.htag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--green);border:1px solid var(--green);background:var(--green-faint);padding:5px 14px;border-radius:2px;margin-bottom:26px;animation:fu .5s ease both;box-shadow:0 0 10px var(--green-glow);}
+.htag::before{content:'▶';font-size:.58rem;}
+h1.htitle{font-family:'Syne',sans-serif;font-size:clamp(2.6rem,5vw,4.4rem);font-weight:800;line-height:1.0;color:var(--white);margin-bottom:22px;animation:fu .5s ease .08s both;}
+h1.htitle .g{color:var(--green);text-shadow:0 0 28px rgba(0,255,157,0.35);}
+h1.htitle .go{color:var(--gold);}
+.hsub{font-family:'JetBrains Mono',monospace;font-size:.84rem;color:var(--gray);line-height:1.9;max-width:460px;margin-bottom:34px;animation:fu .5s ease .16s both;}
+.hbtns{display:flex;gap:12px;flex-wrap:wrap;animation:fu .5s ease .24s both;}
+.btn-g{background:var(--green);color:var(--bg);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.76rem;letter-spacing:.06em;padding:12px 26px;border:none;border-radius:3px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-g:hover{background:#33ffb2;box-shadow:0 0 22px rgba(0,255,157,0.38);transform:translateY(-2px);}
+.btn-gh{background:transparent;color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:400;font-size:.76rem;letter-spacing:.06em;padding:12px 26px;border:1px solid var(--green);border-radius:3px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-gh:hover{background:var(--green-faint);}
+.hstats{display:flex;gap:36px;margin-top:44px;padding-top:28px;border-top:1px solid var(--border);animation:fu .5s ease .32s both;}
+.snum{font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--green);line-height:1;}
+.slbl{font-size:.66rem;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-top:4px;}
+
+/* 3D BILL */
+.bill-scene{perspective:900px;display:flex;align-items:center;justify-content:center;height:250px;position:relative;animation:fu .5s ease .1s both;}
+.bill-wrap{width:350px;height:155px;transform-style:preserve-3d;animation:bspin 9s ease-in-out infinite;position:relative;cursor:grab;user-select:none;}
+.bill-wrap:active{cursor:grabbing;}
+.bill-face{position:absolute;inset:0;border-radius:9px;backface-visibility:hidden;overflow:hidden;box-shadow:0 18px 65px rgba(0,0,0,0.9),0 0 36px rgba(0,255,157,0.1);}
+.bill-front{background:linear-gradient(135deg,#163020 0%,#0c3d1e 25%,#185030 50%,#0c3d1e 75%,#163020 100%);border:1px solid #2a6036;}
+.bill-back{transform:rotateY(180deg);background:linear-gradient(135deg,#163020 0%,#0c3d1e 30%,#185030 50%,#0c3d1e 70%,#163020 100%);border:1px solid #2a6036;}
+.bb1{position:absolute;inset:5px;border:1px solid rgba(255,215,90,0.22);border-radius:6px;pointer-events:none;}
+.bb2{position:absolute;inset:9px;border:.5px solid rgba(255,215,90,0.1);border-radius:4px;pointer-events:none;}
+.bsec{position:absolute;left:50%;top:0;bottom:0;transform:translateX(-50%);width:3px;background:repeating-linear-gradient(0deg,rgba(80,160,220,0.45) 0px,rgba(80,160,220,0.45) 3px,transparent 3px,transparent 7px);}
+.bmic{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 14px,rgba(180,220,160,0.01) 14px,rgba(180,220,160,0.01) 15px);pointer-events:none;}
+.bntl{position:absolute;left:9px;top:7px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:rgba(175,215,155,0.65);}
+.bnbr{position:absolute;right:9px;bottom:7px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:rgba(175,215,155,0.65);}
+.bseries{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.46rem;color:rgba(175,215,155,0.32);letter-spacing:.13em;white-space:nowrap;}
+.bserial{position:absolute;right:92px;bottom:22px;font-family:'JetBrains Mono',monospace;font-size:.48rem;color:rgba(95,195,130,0.5);letter-spacing:.11em;}
+.bwm{position:absolute;right:34px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:rgba(155,225,175,0.08);}
+.bshine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,0.055) 50%,transparent 62%);border-radius:9px;animation:bshine 9s ease-in-out infinite;pointer-events:none;}
+.bglow{position:absolute;width:350px;height:155px;background:radial-gradient(ellipse at center,rgba(0,255,157,0.065) 0%,transparent 70%);filter:blur(18px);animation:bspin 9s ease-in-out infinite;}
+.bbo{position:absolute;inset:5px;border:1px solid rgba(255,215,90,0.18);border-radius:6px;}
+.bbc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:118px;border:2px solid rgba(175,215,155,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.bbld{font-family:'JetBrains Mono',monospace;font-size:.48rem;color:rgba(175,215,155,0.4);text-align:center;line-height:1.5;}
+.bbl{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;color:rgba(175,215,155,0.52);}
+.bbr{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;color:rgba(175,215,155,0.52);}
+.bbtop{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.45rem;color:rgba(175,215,155,0.3);letter-spacing:.13em;white-space:nowrap;}
+.bbbot{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.45rem;color:rgba(175,215,155,0.3);letter-spacing:.13em;white-space:nowrap;}
+
+@keyframes bspin{0%{transform:rotateY(0deg) rotateX(8deg);}25%{transform:rotateY(90deg) rotateX(3deg);}50%{transform:rotateY(180deg) rotateX(8deg);}75%{transform:rotateY(270deg) rotateX(3deg);}100%{transform:rotateY(360deg) rotateX(8deg);}}
+@keyframes bshine{0%,100%{opacity:0;}50%{opacity:1;}}
+@keyframes fu{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* TERMINAL */
+.term{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;font-family:'JetBrains Mono',monospace;}
+.tbar{background:var(--surface2);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.td{width:10px;height:10px;border-radius:50%;}.td.r{background:#ff5f56;}.td.y{background:#ffbd2e;}.td.g{background:#27c93f;}
+.ttl{font-size:.66rem;color:var(--gray);margin-left:8px;letter-spacing:.1em;text-transform:uppercase;}
+.tbody{padding:13px 18px;}
+.tl{font-size:.78rem;color:var(--text);line-height:1.8;padding:1px 0;}
+.tl.c{color:var(--green);}.tl.c::before{content:'$ ';color:var(--gray);}
+.tl.o{color:var(--cyan);}.tl.w{color:var(--gold);}
+.tcur{display:inline-block;width:8px;height:13px;background:var(--green);vertical-align:middle;animation:blink .8s step-end infinite;}
+
+/* SECTIONS */
+.sec{max-width:1240px;margin:0 auto;padding:60px 48px;}
+.eye{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.eye::before{content:'';width:22px;height:1px;background:var(--green);}
+h2.stitle{font-family:'Syne',sans-serif;font-size:clamp(1.6rem,2.8vw,2.3rem);font-weight:800;color:var(--white);line-height:1.15;margin-bottom:11px;}
+.ssub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--gray);line-height:1.9;max-width:500px;margin-bottom:40px;}
+
+/* MODULE CARDS */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all .25s;cursor:pointer;}
+.mc:hover{border-color:var(--green);box-shadow:0 0 26px var(--green-glow);}
+.mch{background:var(--surface2);padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.mcut{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.14em;text-transform:uppercase;}
+.mcbdg{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gray);border:1px solid var(--gray2);padding:3px 8px;border-radius:2px;white-space:nowrap;}
+.mcttl{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--white);margin-top:6px;}
+.mcb{padding:16px 20px;}
+.tr{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--text);cursor:pointer;transition:color .2s;}
+.tr:last-child{border-bottom:none;}
+.tr:hover{color:var(--green);}
+.tr::before{content:'▷';color:var(--green);font-size:.56rem;opacity:.5;flex-shrink:0;}
+.tr:hover::before{content:'▶';opacity:1;}
+
+/* LESSON VIEW */
+.lhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:26px 48px;}
+.lbrd{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--gray);margin-bottom:11px;cursor:pointer;letter-spacing:.05em;}
+.lbrd:hover{color:var(--green);}.lbrd::before{content:'← ';}
+.ltitl{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,2.8vw,2.1rem);font-weight:800;color:var(--white);}
+.lbody{max-width:820px;margin:0 auto;padding:40px;}
+
+/* LESSON CARDS */
+.lc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:26px;margin-bottom:18px;}
+.lcl{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+.lcl::before{content:'//';color:var(--gray);}
+.lc h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--white);margin-bottom:11px;}
+.lc p{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);line-height:1.9;margin-bottom:9px;}
+.lc p:last-child{margin-bottom:0;}
+.fblk{background:var(--bg);border:1px solid var(--green);border-radius:6px;padding:18px;margin:12px 0;text-align:center;box-shadow:0 0 18px var(--green-glow) inset;}
+.fblk .ft{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--green);text-shadow:0 0 10px rgba(0,255,157,0.3);}
+.fblk .fn{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--gray);margin-top:6px;}
+.cblk{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;margin:11px 0;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.9;}
+.cblk .cl{font-size:.58rem;color:var(--green);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:block;}
+.cdr{color:var(--green);}.ccr{color:var(--gold);}.cacc{color:var(--white);}.cnote{color:var(--gray);font-style:italic;}
+.cdiv{border:none;border-top:1px solid var(--border);margin:4px 0;}
+.hl{background:var(--green-faint);border-left:3px solid var(--green);border-radius:0 5px 5px 0;padding:11px 15px;margin:11px 0;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);line-height:1.8;}
+.tawrap{display:flex;gap:16px;flex-wrap:wrap;margin:13px 0;}
+.ta{flex:1;min-width:155px;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.tan{background:var(--surface2);padding:8px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;color:var(--white);border-bottom:1px solid var(--border);}
+.tab{display:grid;grid-template-columns:1fr 1fr;}
+.ts{padding:9px;font-family:'JetBrains Mono',monospace;font-size:.74rem;line-height:2;}
+.ts:first-child{border-right:1px solid var(--border);}
+.tsl{font-size:.56rem;color:var(--gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+/* PQ */
+.pq{background:var(--surface2);border:1px solid rgba(0,255,157,0.18);border-radius:8px;padding:22px;margin-top:4px;}
+.pql{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.pql::before{content:'?';width:16px;height:16px;border-radius:50%;background:var(--green);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;}
+.pqt{font-family:'JetBrains Mono',monospace;font-size:.81rem;font-weight:700;color:var(--white);margin-bottom:14px;line-height:1.6;}
+.pqos{display:flex;flex-direction:column;gap:6px;}
+.pqo{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--text);cursor:pointer;text-align:left;transition:all .15s;}
+.pqo:hover:not(:disabled){border-color:var(--green);color:var(--green);background:var(--green-faint);}
+.pqo.correct{background:rgba(0,255,157,0.08);border-color:var(--green);color:var(--green);}
+.pqo.wrong{background:rgba(255,68,102,0.08);border-color:var(--red);color:var(--red);}
+.pqfb{display:none;margin-top:11px;padding:10px 13px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.74rem;line-height:1.7;}
+.pqfb.show{display:block;}
+.pqfb.ok{background:rgba(0,255,157,0.06);border:1px solid rgba(0,255,157,0.18);color:var(--green);}
+.pqfb.no{background:rgba(255,68,102,0.06);border:1px solid rgba(255,68,102,0.18);color:var(--red);}
+.lnav{display:flex;gap:11px;margin-top:26px;flex-wrap:wrap;}
+
+/* SIMULATIONS */
+.simsec{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 48px;}
+.sgrid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:18px;}
+.scard{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .25s;}
+.scard:hover{border-color:rgba(0,255,157,0.25);}
+.shdr{background:var(--surface2);padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sttl{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;color:var(--white);}
+.stag{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--green);border:1px solid var(--green);padding:3px 8px;border-radius:2px;background:var(--green-faint);}
+.sbody{padding:16px;}
+.ig{margin-bottom:11px;}
+.igl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
+.igi{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--white);transition:border .2s;}
+.igi:focus{outline:none;border-color:var(--green);box-shadow:0 0 7px var(--green-glow);}
+.igs{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--white);cursor:pointer;}
+.igr{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.sbtn{width:100%;background:var(--green);color:var(--bg);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:10px;border:none;border-radius:4px;cursor:pointer;transition:all .2s;margin-top:5px;}
+.sbtn:hover{background:#33ffb2;box-shadow:0 0 13px var(--green-glow);}
+.sres{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:13px;margin-top:11px;display:none;}
+.sres.show{display:block;}
+.srl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px;}
+.srv{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--white);}
+.srn{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--gray);margin-top:5px;line-height:1.7;}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.ri{background:var(--surface2);border-radius:5px;padding:11px;text-align:center;}
+.ri .rl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.ri .rv{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--white);}
+.ri .rp{font-family:'JetBrains Mono',monospace;font-size:.58rem;margin-top:3px;}
+.rg{color:var(--green);}.rw{color:var(--gold);}.rb{color:var(--red);}
+/* T-ACCOUNT SIM */
+.talive{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:11px;}
+.taside{background:var(--surface);padding:11px;}
+.taslbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gray);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.taent{font-family:'JetBrains Mono',monospace;font-size:.76rem;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.tatot{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;padding-top:6px;margin-top:3px;border-top:2px solid var(--border);}
+.tabal{background:var(--surface2);border-top:1px solid var(--border);padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:.74rem;text-align:center;}
+/* QUIZ SIM */
+.qp{display:flex;gap:4px;margin-bottom:13px;}
+.qpd{height:3px;flex:1;border-radius:2px;background:var(--surface2);}
+.qpd.done{background:var(--green);}.qpd.active{background:rgba(0,255,157,0.32);}
+.qq{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:var(--white);margin-bottom:12px;line-height:1.6;}
+.qopts{display:flex;flex-direction:column;gap:6px;}
+.qopt{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);cursor:pointer;text-align:left;transition:all .15s;}
+.qopt:hover:not(:disabled){border-color:var(--green);color:var(--green);background:var(--green-faint);}
+.qopt.correct{background:rgba(0,255,157,0.08);border-color:var(--green);color:var(--green);}
+.qopt.wrong{background:rgba(255,68,102,0.08);border-color:var(--red);color:var(--red);}
+.qstat{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--gray);margin-top:8px;}
+.qscr{text-align:center;padding:14px 0;}
+.qbig{font-family:'JetBrains Mono',monospace;font-size:2.8rem;font-weight:700;color:var(--green);text-shadow:0 0 18px rgba(0,255,157,0.38);}
+.qgrd{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--white);margin-top:5px;}
+.qpct{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gray);margin-top:5px;}
+/* STMT */
+.stbl{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.74rem;}
+.stbl th{background:var(--surface2);color:var(--green);padding:8px 11px;text-align:left;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;}
+.stbl td{padding:6px 11px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.stbl .tr-t td{border-top:2px solid var(--border);font-weight:700;}
+.stbl .tr-s td{border-top:1px solid var(--border);}
+.sinp{width:100%;background:transparent;border:none;font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--cyan);}
+.sinp:focus{outline:none;}
+.lv{color:var(--green);font-weight:700;}.lv.neg{color:var(--red);}
+/* CPA */
+.cpahero{background:var(--surface);border-bottom:1px solid var(--border);padding:56px 48px;position:relative;overflow:hidden;}
+.cpahero::before{content:'CPA';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:'Syne',sans-serif;font-size:15rem;font-weight:800;color:rgba(0,255,157,0.022);pointer-events:none;}
+.cpattl{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.3vw,2.9rem);font-weight:800;color:var(--white);margin-bottom:11px;}
+.cpasub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--gray);max-width:480px;line-height:1.8;}
+.tline{padding-left:28px;position:relative;}
+.tline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--green),transparent);}
+.tli{position:relative;padding:0 0 32px 24px;}
+.tli::before{content:'';position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 9px rgba(0,255,157,0.45);}
+.tln{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;}
+.tlt{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:var(--white);margin-bottom:6px;}
+.tld{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--gray);line-height:1.9;}
+.egrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px;margin-bottom:32px;}
+.ec{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px;text-align:center;transition:border-color .2s;}
+.ec:hover{border-color:var(--green);}
+.ea{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--green);margin-bottom:5px;text-shadow:0 0 9px rgba(0,255,157,0.25);}
+.en{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text);margin-bottom:7px;line-height:1.5;}
+.et{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gray);}
+.et span{color:var(--gold);}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;}
+.ccc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;transition:all .25s;}
+.ccc:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:0 7px 24px rgba(0,255,157,0.055);}
+.cci{font-size:1.4rem;margin-bottom:10px;}
+.cct{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--white);margin-bottom:6px;}
+.ccd{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gray);line-height:1.7;}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:26px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;}
+.fl{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--green);text-shadow:0 0 9px var(--green);}
+.ft{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--gray);}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;padding:32px 18px;}.bill-scene{order:-1;}
+  .sec,.simsec,.cpahero{padding:40px 18px;}.lbody,.lhdr{padding:24px 18px;}
+  nav{padding:0 12px;}.nav-btn{font-size:.62rem;padding:5px 8px;}footer{padding:18px;}
+}
+</style></head><body>
+<nav>
+  <div class="nav-logo" onclick="sp('home')">AM<span>_</span>STUDY</div>
+  <button class="nav-btn active" onclick="sp('home')">Home</button>
+  <button class="nav-btn" onclick="sp('learn')">Learn</button>
+  <button class="nav-btn" onclick="sp('tools')">Simulations</button>
+  <button class="nav-btn" onclick="sp('cpa')">CPA Path</button>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+<div class="hero">
+  <div class="hbg1"></div><div class="hbg2"></div>
+  <div class="hero-left">
+    <div class="htag">Accounting Study Lab v2.0</div>
+    <h1 class="htitle">Master<br><span class="g">Accounting.</span><br><span class="go">Build Wealth.</span></h1>
+    <p class="hsub">// Interactive simulations. Real journal entries.<br>// Built for future CPAs who want to actually understand the numbers.</p>
+    <div class="hbtns">
+      <button class="btn-g" onclick="sp('learn')">Open Study Lab →</button>
+      <button class="btn-gh" onclick="sp('tools')">Run Simulations</button>
+    </div>
+    <div class="hstats">
+      <div><div class="snum">12</div><div class="slbl">Topics</div></div>
+      <div><div class="snum">8</div><div class="slbl">Simulations</div></div>
+      <div><div class="snum">20</div><div class="slbl">Quiz Qs</div></div>
+      <div><div class="snum">4</div><div class="slbl">Cheat Sheets</div></div>
+    </div>
+  </div>
+
+  <!-- 3D $100 BILL -->
+  <div class="bill-scene">
+    <div class="bglow"></div>
+    <div class="bill-wrap" id="bill">
+      <div class="bill-face bill-front">
+        <div class="bmic"></div><div class="bsec"></div><div class="bb1"></div><div class="bb2"></div>
+        <div class="bntl">100</div><div class="bnbr">100</div>
+        <!-- Fed Reserve Seal -->
+        <div style="position:absolute;left:24px;top:50%;transform:translateY(-50%);width:50px;height:50px;">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(175,215,155,0.32)" stroke-width="2"/><circle cx="50" cy="50" r="36" fill="none" stroke="rgba(175,215,155,0.16)" stroke-width="1"/><text x="50" y="33" text-anchor="middle" fill="rgba(175,215,155,0.5)" font-size="8" font-family="monospace" letter-spacing="1">FEDERAL</text><text x="50" y="47" text-anchor="middle" fill="rgba(175,215,155,0.5)" font-size="7.5" font-family="monospace">RESERVE</text><text x="50" y="60" text-anchor="middle" fill="rgba(175,215,155,0.38)" font-size="6.5" font-family="monospace">NOTE</text><text x="50" y="74" text-anchor="middle" fill="rgba(175,215,155,0.62)" font-size="13" font-family="monospace" font-weight="bold">L</text><line x1="50" y1="6" x2="50" y2="11" stroke="rgba(175,215,155,0.22)" stroke-width="1.5"/><line x1="50" y1="89" x2="50" y2="94" stroke="rgba(175,215,155,0.22)" stroke-width="1.5"/><line x1="6" y1="50" x2="11" y2="50" stroke="rgba(175,215,155,0.22)" stroke-width="1.5"/><line x1="89" y1="50" x2="94" y2="50" stroke="rgba(175,215,155,0.22)" stroke-width="1.5"/><line x1="18" y1="18" x2="22" y2="22" stroke="rgba(175,215,155,0.18)" stroke-width="1.5"/><line x1="78" y1="18" x2="82" y2="22" stroke="rgba(175,215,155,0.18)" stroke-width="1.5"/><line x1="18" y1="82" x2="22" y2="78" stroke="rgba(175,215,155,0.18)" stroke-width="1.5"/><line x1="78" y1="82" x2="82" y2="78" stroke="rgba(175,215,155,0.18)" stroke-width="1.5"/></svg>
+        </div>
+        <!-- Portrait -->
+        <div style="position:absolute;right:20px;top:50%;transform:translateY(-50%);width:66px;height:82px;border:1px solid rgba(175,215,155,0.18);border-radius:3px;overflow:hidden;background:rgba(18,60,38,0.28);">
+          <svg viewBox="0 0 66 82"><rect width="66" height="82" fill="rgba(18,56,36,0.25)"/><ellipse cx="33" cy="26" rx="15" ry="17" fill="rgba(125,185,140,0.2)" stroke="rgba(125,185,140,0.26)" stroke-width=".8"/><path d="M18 26 Q20 9 33 11 Q46 9 48 26" fill="rgba(125,185,140,0.16)" stroke="rgba(125,185,140,0.2)" stroke-width=".8"/><path d="M7 82 Q9 54 17 48 Q25 44 33 46 Q41 44 49 48 Q57 54 59 82Z" fill="rgba(85,145,105,0.26)" stroke="rgba(125,185,140,0.16)" stroke-width=".8"/><path d="M26 47 L33 55 L40 47" fill="none" stroke="rgba(195,225,205,0.3)" stroke-width=".8"/><ellipse cx="25" cy="24" rx="1.7" ry="2.1" fill="rgba(125,185,140,0.35)"/><ellipse cx="41" cy="24" rx="1.7" ry="2.1" fill="rgba(125,185,140,0.35)"/><path d="M28 34 Q33 38 38 34" fill="none" stroke="rgba(125,185,140,0.35)" stroke-width=".9"/><path d="M18 31 Q14 36 18 42 Q21 48 18 50" fill="none" stroke="rgba(125,185,140,0.2)" stroke-width=".9"/><path d="M48 31 Q52 36 48 42 Q45 48 48 50" fill="none" stroke="rgba(125,185,140,0.2)" stroke-width=".9"/><text x="33" y="74" text-anchor="middle" fill="rgba(125,185,140,0.4)" font-size="5" font-family="monospace">FRANKLIN</text></svg>
+        </div>
+        <div class="bwm">100</div>
+        <div class="bserial">NL 73941852 F</div>
+        <div class="bseries">THE UNITED STATES OF AMERICA · SERIES 2017A ·</div>
+        <div class="bshine"></div>
+      </div>
+      <div class="bill-face bill-back">
+        <div class="bmic"></div><div class="bbo"></div>
+        <div class="bbl">100</div><div class="bbr">100</div>
+        <div class="bbc"><div class="bbld">▓▓▓▓▓▓▓<br>║║║║║║║<br>INDEPENDENCE<br>HALL<br>████████</div></div>
+        <div class="bbtop">THE UNITED STATES OF AMERICA</div>
+        <div class="bbbot">ONE HUNDRED DOLLARS</div>
+        <div class="bshine"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1240px;margin:0 auto;padding:0 48px 52px;">
+  <div class="term">
+    <div class="tbar"><div class="td r"></div><div class="td y"></div><div class="td g"></div><span class="ttl">accounting_master — study session active</span></div>
+    <div class="tbody">
+      <div class="tl c">init study_session --mode=interactive --units=3</div>
+      <div class="tl o">✓ Loaded 12 lessons across 3 units</div>
+      <div class="tl o">✓ 8 simulation engines initialized</div>
+      <div class="tl o">✓ Quiz bank: 20 questions loaded and randomized</div>
+      <div class="tl w">ℹ  Tip: Start with Unit 01 → Accounting Basics if you are new</div>
+      <div class="tl c">ready <span class="tcur"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec" style="padding-top:0;">
+  <div class="eye">Curriculum</div>
+  <h2 class="stitle">Three Units. Zero Confusion.</h2>
+  <p class="ssub">// Click any topic to open the interactive lesson with explanations, T-accounts, journal entries, and a practice question.</p>
+  <div class="mgrid">
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_01</div><div class="mcttl">Accounting Basics</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('what-is-accounting')">What is Accounting?</div><div class="tr" onclick="ol('accounting-equation')">The Accounting Equation</div><div class="tr" onclick="ol('debit-credit')">Debit vs. Credit Rules</div><div class="tr" onclick="ol('t-accounts')">T-Accounts</div></div></div>
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_02</div><div class="mcttl">Financial Accounting</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('journal-entries')">Journal Entries</div><div class="tr" onclick="ol('adjusting-entries')">Adjusting Entries</div><div class="tr" onclick="ol('closing-entries')">Closing Entries</div><div class="tr" onclick="ol('financial-statements')">Financial Statements</div></div></div>
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_03</div><div class="mcttl">Advanced Topics</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('bad-debt')">Bad Debt Expense</div><div class="tr" onclick="ol('depreciation')">Depreciation Methods</div><div class="tr" onclick="ol('inventory')">Inventory Methods (FIFO/LIFO)</div><div class="tr" onclick="ol('ratio-analysis')">Ratio Analysis</div></div></div>
+  </div>
+</div>
+<footer><div class="fl">AM_STUDY</div><div class="ft">// making accounting simple, practical, and powerful</div></footer>
+</div>
+
+<!-- LEARN -->
+<div id="page-learn" class="page">
+<div class="sec">
+  <div class="eye">Full Curriculum</div>
+  <h2 class="stitle">Study Lab — All Lessons</h2>
+  <p class="ssub">// Select any topic to open the interactive lesson.</p>
+  <div class="mgrid">
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_01 — FUNDAMENTALS</div><div class="mcttl">Accounting Basics</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('what-is-accounting')">What is Accounting?</div><div class="tr" onclick="ol('accounting-equation')">The Accounting Equation</div><div class="tr" onclick="ol('debit-credit')">Debit vs. Credit Rules</div><div class="tr" onclick="ol('t-accounts')">T-Accounts</div></div></div>
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_02 — CORE</div><div class="mcttl">Financial Accounting</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('journal-entries')">Journal Entries</div><div class="tr" onclick="ol('adjusting-entries')">Adjusting Entries</div><div class="tr" onclick="ol('closing-entries')">Closing Entries</div><div class="tr" onclick="ol('financial-statements')">Financial Statements</div></div></div>
+    <div class="mc"><div class="mch"><div><div class="mcut">// UNIT_03 — ADVANCED</div><div class="mcttl">Advanced Topics</div></div><div class="mcbdg">4 lessons</div></div><div class="mcb"><div class="tr" onclick="ol('bad-debt')">Bad Debt Expense</div><div class="tr" onclick="ol('depreciation')">Depreciation Methods</div><div class="tr" onclick="ol('inventory')">Inventory Methods</div><div class="tr" onclick="ol('ratio-analysis')">Ratio Analysis</div></div></div>
+  </div>
+</div>
+<footer><div class="fl">AM_STUDY</div><div class="ft">// making accounting simple, practical, and powerful</div></footer>
+</div>
+
+<!-- LESSON VIEW -->
+<div id="lesson-view">
+  <div class="lhdr"><div class="lbrd" onclick="cl()">Back to All Lessons</div><div class="ltitl" id="ltitle">Lesson</div></div>
+  <div class="lbody" id="lbody"></div>
+</div>
+<!-- TOOLS -->
+<div id="page-tools" class="page">
+<div class="sec" style="padding-bottom:0;">
+  <div class="eye">Interactive Tools</div>
+  <h2 class="stitle">Simulation Lab</h2>
+  <p class="ssub">// Eight live simulations. Type numbers — watch the accounting happen. No memorizing when you can simulate.</p>
+</div>
+<div class="simsec">
+<div class="sgrid">
+
+<div class="scard"><div class="shdr"><div class="sttl">⚖ Accounting Equation Solver</div><div class="stag">LIVE</div></div>
+<div class="sbody">
+  <div class="ig"><div class="igl">Solve For</div><select class="igs" id="eq-solve" onchange="resetEq()"><option value="assets">Assets</option><option value="liabilities">Liabilities</option><option value="equity">Owner's Equity</option></select></div>
+  <div id="eq-inputs"></div>
+  <button class="sbtn" onclick="calcEq()">CALCULATE</button>
+  <div class="sres" id="eq-res"><div class="srl">Result</div><div class="srv" id="eq-rv">—</div><div class="srn" id="eq-rn"></div></div>
+  <div class="fblk" style="margin-top:13px;"><div class="ft">A = L + OE</div><div class="fn">Assets = Liabilities + Owner's Equity</div></div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">📊 Break-Even Simulator</div><div class="stag">LIVE + CHART</div></div>
+<div class="sbody">
+  <div class="igr"><div class="ig"><div class="igl">Fixed Costs ($)</div><input type="number" class="igi" id="be-fc" placeholder="50000" oninput="calcBE()"></div><div class="ig"><div class="igl">Selling Price ($)</div><input type="number" class="igi" id="be-sp" placeholder="25" oninput="calcBE()"></div></div>
+  <div class="ig"><div class="igl">Variable Cost per Unit ($)</div><input type="number" class="igi" id="be-vc" placeholder="15" oninput="calcBE()"></div>
+  <div id="be-out" style="display:none;">
+    <div class="sres show"><div class="rgrid"><div class="ri"><div class="rl">Break-Even Units</div><div class="rv" id="be-units">—</div></div><div class="ri"><div class="rl">Break-Even Sales</div><div class="rv" id="be-sales">—</div></div></div><div style="margin-top:7px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--gray);" id="be-cm"></div></div>
+    <div style="height:95px;margin-top:9px;background:var(--surface);border:1px solid var(--border);border-radius:5px;overflow:hidden;padding:7px;"><canvas id="beC" style="width:100%;height:100%;"></canvas></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gray);margin-top:4px;text-align:center;" id="be-lbl"></div>
+  </div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">📒 T-Account Builder</div><div class="stag">INTERACTIVE</div></div>
+<div class="sbody">
+  <div class="igr"><div class="ig"><div class="igl">Amount ($)</div><input type="number" class="igi" id="ta-amt" placeholder="1000"></div><div class="ig"><div class="igl">Side</div><select class="igs" id="ta-side"><option value="debit">Debit (Dr)</option><option value="credit">Credit (Cr)</option></select></div></div>
+  <div style="display:flex;gap:7px;"><button class="sbtn" onclick="addTA()" style="flex:1;">ADD ENTRY</button><button class="sbtn" onclick="clrTA()" style="flex:0 0 58px;background:var(--surface2);color:var(--red);border:1px solid var(--red);">CLR</button></div>
+  <div class="talive" id="ta-live">
+    <div class="taside"><div class="taslbl">Debit (Dr)</div><div id="ta-dr" style="font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--green);min-height:50px;line-height:2;">—</div><div class="tatot" style="color:var(--green);" id="ta-dt">$0.00</div></div>
+    <div class="taside"><div class="taslbl">Credit (Cr)</div><div id="ta-cr" style="font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--gold);min-height:50px;line-height:2;">—</div><div class="tatot" style="color:var(--gold);" id="ta-ct">$0.00</div></div>
+  </div>
+  <div class="tabal" id="ta-bal" style="color:var(--green);">Balance: $0.00 (Balanced ✓)</div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">📈 Financial Ratio Analyzer</div><div class="stag">ANALYSIS</div></div>
+<div class="sbody">
+  <div class="igr"><div class="ig"><div class="igl">Current Assets</div><input type="number" class="igi" id="r-ca" placeholder="150000"></div><div class="ig"><div class="igl">Current Liabilities</div><input type="number" class="igi" id="r-cl" placeholder="75000"></div></div>
+  <div class="igr"><div class="ig"><div class="igl">Total Assets</div><input type="number" class="igi" id="r-ta" placeholder="500000"></div><div class="ig"><div class="igl">Total Liabilities</div><input type="number" class="igi" id="r-tl" placeholder="200000"></div></div>
+  <div class="igr"><div class="ig"><div class="igl">Net Income</div><input type="number" class="igi" id="r-ni" placeholder="80000"></div><div class="ig"><div class="igl">Net Sales</div><input type="number" class="igi" id="r-s" placeholder="400000"></div></div>
+  <button class="sbtn" onclick="calcRatios()">ANALYZE RATIOS</button>
+  <div id="ratio-res" style="display:none;margin-top:11px;"><div class="rgrid"><div class="ri"><div class="rl">Current Ratio</div><div class="rv" id="r-cur">—</div><div class="rp" id="r-cip"></div></div><div class="ri"><div class="rl">Debt-to-Equity</div><div class="rv" id="r-dte">—</div><div class="rp" id="r-dip"></div></div><div class="ri"><div class="rl">Net Profit Margin</div><div class="rv" id="r-npm">—</div><div class="rp" id="r-nip"></div></div><div class="ri"><div class="rl">Return on Assets</div><div class="rv" id="r-roa">—</div><div class="rp" id="r-rip"></div></div></div></div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">🧠 Rapid-Fire Quiz</div><div class="stag">10 QUESTIONS</div></div>
+<div class="sbody" id="quiz-con">
+  <div class="qp" id="qp"></div>
+  <div class="qq" id="qq"></div>
+  <div class="qopts" id="qopts"></div>
+  <div class="qstat" id="qstat"></div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">🧾 Income Statement Builder</div><div class="stag">LIVE CALC</div></div>
+<div class="sbody">
+  <table class="stbl">
+    <tr><th>Account</th><th>Amount ($)</th></tr>
+    <tr><td style="color:var(--text);">Net Sales / Revenue</td><td><input class="sinp igi" id="is-s" type="number" placeholder="0" oninput="calcIS()"></td></tr>
+    <tr><td style="color:var(--text);">&nbsp;— Cost of Goods Sold</td><td><input class="sinp igi" id="is-cg" type="number" placeholder="0" oninput="calcIS()"></td></tr>
+    <tr class="tr-s"><td style="color:var(--green);font-weight:700;">Gross Profit</td><td class="lv" id="is-gp">$0</td></tr>
+    <tr><td style="color:var(--text);">&nbsp;— Salaries</td><td><input class="sinp igi" id="is-sal" type="number" placeholder="0" oninput="calcIS()"></td></tr>
+    <tr><td style="color:var(--text);">&nbsp;— Rent</td><td><input class="sinp igi" id="is-rnt" type="number" placeholder="0" oninput="calcIS()"></td></tr>
+    <tr><td style="color:var(--text);">&nbsp;— Other</td><td><input class="sinp igi" id="is-oth" type="number" placeholder="0" oninput="calcIS()"></td></tr>
+    <tr class="tr-t"><td style="color:var(--gold);font-weight:700;font-family:'Syne',sans-serif;font-size:.84rem;">NET INCOME</td><td class="lv" id="is-ni" style="font-size:.95rem;">$0</td></tr>
+  </table>
+  <div style="margin-top:11px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--gray);" id="is-mg"></div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">📉 Depreciation Schedule Generator</div><div class="stag">SCHEDULE</div></div>
+<div class="sbody">
+  <div class="igr"><div class="ig"><div class="igl">Asset Cost ($)</div><input type="number" class="igi" id="d-cost" placeholder="50000"></div><div class="ig"><div class="igl">Salvage Value ($)</div><input type="number" class="igi" id="d-sv" placeholder="5000"></div></div>
+  <div class="igr"><div class="ig"><div class="igl">Useful Life (yrs)</div><input type="number" class="igi" id="d-life" placeholder="5"></div><div class="ig"><div class="igl">Method</div><select class="igs" id="d-m"><option value="sl">Straight-Line</option><option value="ddb">Double-Declining Balance</option><option value="syd">Sum-of-Years-Digits</option></select></div></div>
+  <button class="sbtn" onclick="calcDep()">GENERATE SCHEDULE</button>
+  <div id="dep-res" style="display:none;margin-top:11px;max-height:210px;overflow-y:auto;"></div>
+</div></div>
+
+<div class="scard"><div class="shdr"><div class="sttl">📦 Inventory Method Comparison</div><div class="stag">FIFO vs LIFO</div></div>
+<div class="sbody">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gray);margin-bottom:11px;line-height:1.7;">Enter purchase batches. Set units sold. Compare FIFO, LIFO, and Weighted Average COGS.</p>
+  <div id="inv-rows">
+    <div class="igr inv-row" style="margin-bottom:9px;"><div class="ig"><div class="igl">Units</div><input type="number" class="igi inv-u" placeholder="100"></div><div class="ig"><div class="igl">Cost/Unit ($)</div><input type="number" class="igi inv-c" placeholder="10.00"></div></div>
+    <div class="igr inv-row" style="margin-bottom:9px;"><div class="ig"><div class="igl">Units</div><input type="number" class="igi inv-u" placeholder="100"></div><div class="ig"><div class="igl">Cost/Unit ($)</div><input type="number" class="igi inv-c" placeholder="14.00"></div></div>
+  </div>
+  <div style="display:flex;gap:7px;align-items:flex-end;margin-bottom:7px;">
+    <div class="ig" style="flex:1;margin-bottom:0;"><div class="igl">Units Sold</div><input type="number" class="igi" id="inv-sold" placeholder="80"></div>
+    <button class="sbtn" onclick="addInvRow()" style="width:auto;padding:8px 12px;background:var(--surface2);color:var(--green);border:1px solid var(--green);font-size:.66rem;margin-top:0;">+ ROW</button>
+  </div>
+  <button class="sbtn" onclick="calcInv()">COMPARE METHODS</button>
+  <div id="inv-res" style="display:none;margin-top:11px;"></div>
+</div></div>
+
+</div>
+<div style="max-width:1240px;margin:32px auto 0;display:flex;gap:9px;flex-wrap:wrap;">
+  <button class="btn-gh" onclick="dl('formulas')" style="font-size:.66rem;">↓ Formula Sheet</button>
+  <button class="btn-gh" onclick="dl('taccounts')" style="font-size:.66rem;">↓ T-Account Template</button>
+  <button class="btn-gh" onclick="dl('debit-credit')" style="font-size:.66rem;">↓ Debit/Credit Rules</button>
+  <button class="btn-gh" onclick="dl('ratios')" style="font-size:.66rem;">↓ Key Ratios Sheet</button>
+</div>
+</div>
+<footer><div class="fl">AM_STUDY</div><div class="ft">// making accounting simple, practical, and powerful</div></footer>
+</div>
+
+<!-- CPA PAGE -->
+<div id="page-cpa" class="page">
+<div class="cpahero">
+  <div class="eye">Career Path</div>
+  <div class="cpattl">Becoming a CPA</div>
+  <p class="cpasub">// The Certified Public Accountant credential is among the most respected in all of business. Here's the complete roadmap.</p>
+</div>
+<div style="max-width:1240px;margin:0 auto;padding:60px 48px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;">
+  <div>
+    <div class="eye">Roadmap</div>
+    <h2 class="stitle" style="margin-bottom:28px;">Steps to CPA Licensure</h2>
+    <div class="tline">
+      <div class="tli"><div class="tln">// STEP_01</div><div class="tlt">Earn a Bachelor's in Accounting</div><div class="tld">4-year degree covering financial accounting, auditing, taxation, business law, and managerial accounting.</div></div>
+      <div class="tli"><div class="tln">// STEP_02</div><div class="tlt">Complete 150 Credit Hours</div><div class="tld">30 credits beyond a standard degree. Most candidates pursue a Master of Accounting (MAcc) or a 5-year BS/MS program.</div></div>
+      <div class="tli"><div class="tln">// STEP_03</div><div class="tlt">Gain 1–2 Years Under a CPA</div><div class="tld">Public accounting firms, corporate finance, or government roles all qualify. Requirements vary by state.</div></div>
+      <div class="tli"><div class="tln">// STEP_04</div><div class="tlt">Pass the CPA Exam (4 Sections)</div><div class="tld">16-hour exam. Score 75+ on each section. All four must be passed within a rolling 30-month window.</div></div>
+      <div class="tli"><div class="tln">// STEP_05</div><div class="tlt">Apply for Your State License</div><div class="tld">Submit transcripts, work verification, and exam scores to your state board of accountancy.</div></div>
+      <div class="tli" style="padding-bottom:0;"><div class="tln">// STEP_06</div><div class="tlt">Maintain via CPE (40 hrs/year)</div><div class="tld">Continuing Professional Education keeps your license active and skills current year after year.</div></div>
+    </div>
+  </div>
+  <div>
+    <div class="eye">The Exam</div>
+    <h2 class="stitle" style="margin-bottom:18px;">CPA Exam Sections</h2>
+    <div class="egrid">
+      <div class="ec"><div class="ea">AUD</div><div class="en">Auditing &amp; Attestation</div><div class="et"><span>4 hrs</span> · Core</div></div>
+      <div class="ec"><div class="ea">FAR</div><div class="en">Financial Accounting &amp; Reporting</div><div class="et"><span>4 hrs</span> · Core</div></div>
+      <div class="ec"><div class="ea">REG</div><div class="en">Taxation &amp; Regulation</div><div class="et"><span>4 hrs</span> · Core</div></div>
+      <div class="ec"><div class="ea">BAR/TCP</div><div class="en">Discipline Section (choose 1)</div><div class="et"><span>4 hrs</span> · Elective</div></div>
+    </div>
+    <div class="eye" style="margin-top:8px;">Career Paths</div>
+    <h2 class="stitle" style="margin-bottom:18px;">Where CPAs Work</h2>
+    <div class="cgrid">
+      <div class="ccc"><div class="cci">🏢</div><div class="cct">Public Accounting</div><div class="ccd">Big 4 or regional firms — audit, tax, advisory for clients.</div></div>
+      <div class="ccc"><div class="cci">🏭</div><div class="cct">Corporate Finance</div><div class="ccd">Controller or CFO — internal reporting and strategy.</div></div>
+      <div class="ccc"><div class="cci">🏛️</div><div class="cct">Government / Nonprofit</div><div class="ccd">IRS, SEC, GAO — public funds and compliance.</div></div>
+      <div class="ccc"><div class="cci">💼</div><div class="cct">Own Practice</div><div class="ccd">Launch a CPA firm serving small businesses.</div></div>
+    </div>
+  </div>
+</div>
+<footer><div class="fl">AM_STUDY</div><div class="ft">// making accounting simple, practical, and powerful</div></footer>
+</div>
+<script>
+// NAV
+function sp(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('lesson-view').classList.remove('active');const p=document.getElementById('page-'+n);if(p){p.classList.add('active');window.scrollTo(0,0);}const m={home:0,learn:1,tools:2,cpa:3};if(m[n]!==undefined)document.querySelectorAll('.nav-btn')[m[n]].classList.add('active');}
+function ol(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.nav-btn')[1].classList.add('active');const lv=document.getElementById('lesson-view');lv.classList.add('active');window.scrollTo(0,0);const L=LS[id];if(!L)return;document.getElementById('ltitle').textContent=L.title;document.getElementById('lbody').innerHTML=L.body;}
+function cl(){document.getElementById('lesson-view').classList.remove('active');sp('learn');}
+function ca(btn,ok){const c=btn.closest('.pq');c.querySelectorAll('.pqo').forEach(o=>o.disabled=true);const fb=c.querySelector('.pqfb');if(ok){btn.classList.add('correct');fb.classList.add('show','ok');}else{btn.classList.add('wrong');fb.classList.add('show','no');c.querySelectorAll('.pqo').forEach(o=>{if(o.onclick.toString().includes('true'))o.classList.add('correct');});}}
+
+// LESSONS
+const LS={
+'what-is-accounting':{title:'What is Accounting?',body:`<div class="lc"><div class="lcl">Explanation</div><h3>The Language of Business</h3><p>Accounting records, classifies, summarizes, and interprets financial transactions. It tells owners, investors, lenders, and regulators the exact financial health of a business.</p><div class="hl">// Key idea: Accounting answers — How much money? Where from? Where did it go?</div><p>Two branches: <strong style="color:var(--green)">Financial Accounting</strong> (external) and <strong style="color:var(--gold)">Managerial Accounting</strong> (internal decisions).</p></div><div class="lc"><div class="lcl">GAAP</div><h3>Generally Accepted Accounting Principles</h3><p>All U.S. public companies follow GAAP — standardized rules by the FASB. Key principles: <strong style="color:var(--green)">Cost Principle</strong> (record at purchase cost), <strong style="color:var(--cyan)">Revenue Recognition</strong> (recognize when earned), <strong style="color:var(--gold)">Matching</strong> (expenses match revenues they generate).</p></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">What is the primary purpose of accounting?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) Calculate employee salaries</button><button class="pqo" onclick="ca(this,true)">B) Record, summarize, and communicate financial information</button><button class="pqo" onclick="ca(this,false)">C) Manage customer relationships</button></div><div class="pqfb">✓ Correct. Accounting records, classifies, summarizes, and interprets financial data for decision-making.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('accounting-equation')">Next: Accounting Equation →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'accounting-equation':{title:'The Accounting Equation',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>The Foundation of All Accounting</h3><p>Every single accounting transaction must keep this equation balanced. This is the immutable law of double-entry accounting.</p><div class="fblk"><div class="ft">Assets = Liabilities + Owner's Equity</div><div class="fn">Every transaction affects at least two accounts. Debits always equal credits.</div></div><p><strong style="color:var(--green)">Assets</strong> — owned (cash, equipment). <strong style="color:var(--red)">Liabilities</strong> — owed (loans, payables). <strong style="color:var(--gold)">Owner's Equity</strong> — residual interest after debts.</p></div><div class="lc"><div class="lcl">Simulation — Three Transactions</div><div class="cblk"><span class="cl">// transaction_log.txt</span><div>Txn 1: Owner invests $10,000 cash</div><div class="cdr">  Cash +$10,000  |  Equity +$10,000</div><div style="color:var(--gray)">  $10,000 = $0 + $10,000 ✓</div><hr class="cdiv"><div>Txn 2: Borrow $5,000 from bank</div><div class="cdr">  Cash +$5,000   |  Notes Payable +$5,000</div><div style="color:var(--gray)">  $15,000 = $5,000 + $10,000 ✓</div><hr class="cdiv"><div>Txn 3: Buy equipment $3,000 cash</div><div class="cdr">  Equipment +$3,000  |  Cash -$3,000</div><div style="color:var(--gray)">  $15,000 = $5,000 + $10,000 ✓</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Assets = $80,000. Liabilities = $30,000. Owner's Equity?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) $110,000</button><button class="pqo" onclick="ca(this,true)">B) $50,000</button><button class="pqo" onclick="ca(this,false)">C) $30,000</button></div><div class="pqfb">✓ Assets – Liabilities = $80,000 – $30,000 = $50,000.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('debit-credit')">Next: Debit vs Credit →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'debit-credit':{title:'Debit vs. Credit',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Left Side. Right Side. That's It.</h3><p>Debit = left side of a T-account. Credit = right side. They do NOT mean positive or negative. The effect depends entirely on account type.</p><div class="hl">// DEAL: Debits increase Dividends, Expenses, Assets, Losses<br>// GICL: Credits increase Gains, Income, Capital (equity), Liabilities</div></div><div class="lc"><div class="lcl">Reference Table</div><div class="cblk"><span class="cl">// debit_credit_rules.txt</span><div style="display:grid;grid-template-columns:130px 85px 55px 55px;gap:3px;font-size:.75rem;"><div style="color:var(--green)">ACCOUNT</div><div style="color:var(--green)">NORMAL</div><div style="color:var(--green)">DR</div><div style="color:var(--green)">CR</div><div class="cacc">Assets</div><div class="cdr">Debit</div><div class="cdr">↑</div><div class="ccr">↓</div><div class="cacc">Liabilities</div><div class="ccr">Credit</div><div class="ccr">↓</div><div class="cdr" style="color:var(--gold)">↑</div><div class="cacc">Equity</div><div class="ccr">Credit</div><div class="ccr">↓</div><div class="cdr" style="color:var(--gold)">↑</div><div class="cacc">Revenue</div><div class="ccr">Credit</div><div class="ccr">↓</div><div class="cdr" style="color:var(--gold)">↑</div><div class="cacc">Expenses</div><div class="cdr">Debit</div><div class="cdr">↑</div><div class="ccr">↓</div></div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">A company receives $500 cash. How is Cash recorded?</div><div class="pqos"><button class="pqo" onclick="ca(this,true)">A) Debit Cash $500 — assets increase with a debit</button><button class="pqo" onclick="ca(this,false)">B) Credit Cash $500 — wrong side</button><button class="pqo" onclick="ca(this,false)">C) Debit Revenue $500</button></div><div class="pqfb">✓ Cash is an asset. Assets have a normal debit balance — they increase with a debit.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('t-accounts')">Next: T-Accounts →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'t-accounts':{title:'T-Accounts',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Visualizing the Ledger</h3><p>A T-account is a visual representation of a ledger account. Named after the letter T — account name at top, debits on the left, credits on the right. Helps trace each account's running balance.</p></div><div class="lc"><div class="lcl">Example — $1,000 Credit Sale</div><p>Customer buys $1,000 of goods on account (will pay later):</p><div class="tawrap"><div class="ta"><div class="tan">Accounts Receivable</div><div class="tab"><div class="ts"><div class="tsl">Debit</div><span style="color:var(--green)">1,000 ✓</span></div><div class="ts"><div class="tsl">Credit</div>—</div></div></div><div class="ta"><div class="tan">Revenue</div><div class="tab"><div class="ts"><div class="tsl">Debit</div>—</div><div class="ts"><div class="tsl">Credit</div><span style="color:var(--gold)">1,000 ✓</span></div></div></div></div><div class="hl">// Debit = Credit = $1,000. Equation stays balanced. ✓</div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Where do credits go in a T-account?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) The left side</button><button class="pqo" onclick="ca(this,true)">B) The right side</button><button class="pqo" onclick="ca(this,false)">C) At the top</button></div><div class="pqfb">✓ Debits go on the left. Credits go on the right. Always.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('journal-entries')">Next: Journal Entries →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'journal-entries':{title:'Journal Entries',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>The Book of Original Entry</h3><p>Every transaction is first recorded in the general journal. Each entry includes: date, accounts affected, amounts, and description. Total debits must always equal total credits.</p></div><div class="lc"><div class="lcl">Two Real Examples</div><div class="cblk"><span class="cl">// Example 1: Purchase supplies for cash</span><div><span class="cacc">Supplies</span> <span class="cdr">Dr. 800</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Cash</span> <span class="ccr">Cr. 800</span></div><div class="cnote">&nbsp;&nbsp;&nbsp;&nbsp;// Purchased office supplies for cash</div></div><div class="cblk"><span class="cl">// Example 2: Earn revenue in cash</span><div><span class="cacc">Cash</span> <span class="cdr">Dr. 5,000</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Service Revenue</span> <span class="ccr">Cr. 5,000</span></div><div class="cnote">&nbsp;&nbsp;&nbsp;&nbsp;// Performed services and received cash</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Company earns $5,000 cash revenue. Which entry is correct?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) Debit Revenue / Credit Cash</button><button class="pqo" onclick="ca(this,true)">B) Debit Cash / Credit Revenue</button><button class="pqo" onclick="ca(this,false)">C) Debit Expense / Credit Cash</button></div><div class="pqfb">✓ Cash (asset) increases → Debit. Revenue increases → Credit.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('adjusting-entries')">Next: Adjusting Entries →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'adjusting-entries':{title:'Adjusting Entries',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Matching Revenue and Expense to the Right Period</h3><p>Adjusting entries are made at period-end to ensure revenues and expenses are recognized when earned/incurred — not when cash moves. Four types:</p><div class="hl">// Prepaid Expenses → asset used up → Dr. Expense, Cr. Prepaid</div><div class="hl">// Unearned Revenue → service performed → Dr. Unearned, Cr. Revenue</div><div class="hl">// Accrued Expenses → owed but unpaid → Dr. Expense, Cr. Payable</div><div class="hl">// Accrued Revenue → earned but uncollected → Dr. Receivable, Cr. Revenue</div></div><div class="lc"><div class="lcl">Example — Prepaid Insurance</div><div class="cblk"><span class="cl">// Jan 1: Pay $1,200 for 12-month insurance policy</span><div><span class="cacc">Prepaid Insurance</span> <span class="cdr">Dr. 1,200</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Cash</span> <span class="ccr">Cr. 1,200</span></div><br><span class="cl">// Jan 31 (month-end adjusting entry):</span><div><span class="cacc">Insurance Expense</span> <span class="cdr">Dr. 100</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Prepaid Insurance</span> <span class="ccr">Cr. 100</span></div><div class="cnote">&nbsp;&nbsp;&nbsp;&nbsp;// $1,200 ÷ 12 = $100/month</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Revenue earned but NOT yet collected requires which adjusting entry type?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) Prepaid Expense</button><button class="pqo" onclick="ca(this,false)">B) Unearned Revenue</button><button class="pqo" onclick="ca(this,true)">C) Accrued Revenue</button></div><div class="pqfb">✓ Accrued Revenue — earned but uncollected. Dr. Receivable, Cr. Revenue.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('financial-statements')">Next: Financial Statements →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'closing-entries':{title:'Closing Entries',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Resetting Temporary Accounts to Zero</h3><p>At year-end, temporary accounts (Revenue, Expenses, Dividends) are closed to Retained Earnings. Balance sheet accounts (Assets, Liabilities, Equity) are permanent — never closed.</p></div><div class="lc"><div class="lcl">The Four Closing Entries</div><div class="cblk"><span class="cl">// Step 1: Close Revenue → Income Summary</span><div><span class="cacc">Revenue</span> <span class="cdr">Dr. XXX</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Income Summary</span> <span class="ccr">Cr. XXX</span></div><br><span class="cl">// Step 2: Close Expenses → Income Summary</span><div><span class="cacc">Income Summary</span> <span class="cdr">Dr. XXX</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;All Expenses</span> <span class="ccr">Cr. XXX</span></div><br><span class="cl">// Step 3: Close Income Summary → Retained Earnings</span><div><span class="cacc">Income Summary</span> <span class="cdr">Dr. XXX</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Retained Earnings</span> <span class="ccr">Cr. XXX</span></div><br><span class="cl">// Step 4: Close Dividends → Retained Earnings</span><div><span class="cacc">Retained Earnings</span> <span class="cdr">Dr. XXX</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Dividends</span> <span class="ccr">Cr. XXX</span></div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Which accounts are PERMANENT and NOT closed at year-end?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) Revenue and Expense accounts</button><button class="pqo" onclick="ca(this,true)">B) Assets, Liabilities, and Equity</button><button class="pqo" onclick="ca(this,false)">C) All accounts are closed</button></div><div class="pqfb">✓ Balance sheet accounts are permanent — they carry forward to the next period.</div></div></div><div class="lnav"><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'financial-statements':{title:'Financial Statements',body:`<div class="lc"><div class="lcl">Overview</div><h3>Four Core Statements</h3><p>Financial statements are the final output of the accounting cycle. They communicate financial position and performance to investors, creditors, and management.</p></div><div class="lc"><div class="lcl">Income Statement</div><h3>Did the business make money?</h3><div class="fblk"><div class="ft">Net Income = Revenue − Expenses</div></div></div><div class="lc"><div class="lcl">Balance Sheet</div><h3>What does the business own and owe right now?</h3><div class="fblk"><div class="ft">Assets = Liabilities + Owner's Equity</div></div></div><div class="lc"><div class="lcl">Statement of Cash Flows</div><h3>Where did cash come from and go?</h3><p>Tracks cash movement across Operating, Investing, and Financing activities.</p></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Which statement shows assets, liabilities, and equity?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) Income Statement</button><button class="pqo" onclick="ca(this,true)">B) Balance Sheet</button><button class="pqo" onclick="ca(this,false)">C) Statement of Cash Flows</button></div><div class="pqfb">✓ The Balance Sheet shows what the company owns and owes at a specific date.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('bad-debt')">Next: Bad Debt Expense →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'bad-debt':{title:'Bad Debt Expense',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>When Customers Don't Pay</h3><p>Bad Debt Expense records estimated uncollectible receivables. The Allowance Method (GAAP preferred) matches the expense to the period revenue was earned.</p><div class="hl">// Allowance for Doubtful Accounts = contra-asset (normal CREDIT balance)<br>// It reduces Accounts Receivable on the balance sheet</div></div><div class="lc"><div class="lcl">Two Key Entries</div><div class="cblk"><span class="cl">// Step 1: Estimate bad debts at period end</span><div><span class="cacc">Bad Debt Expense</span> <span class="cdr">Dr. 5,000</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Allowance for Doubtful Accounts</span> <span class="ccr">Cr. 5,000</span></div><br><span class="cl">// Step 2: Write off specific uncollectible account</span><div><span class="cacc">Allowance for Doubtful Accounts</span> <span class="cdr">Dr. 800</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Accounts Receivable</span> <span class="ccr">Cr. 800</span></div><div class="cnote">&nbsp;&nbsp;&nbsp;&nbsp;// Note: No expense here — already estimated in Step 1!</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Allowance for Doubtful Accounts is best described as:</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) A liability with a normal debit balance</button><button class="pqo" onclick="ca(this,true)">B) A contra-asset with a normal credit balance</button><button class="pqo" onclick="ca(this,false)">C) An expense that reduces equity directly</button></div><div class="pqfb">✓ Contra-asset — it offsets Accounts Receivable on the balance sheet.</div></div></div><div class="lnav"><button class="btn-g" onclick="ol('depreciation')">Next: Depreciation →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'depreciation':{title:'Depreciation',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Spreading an Asset's Cost Over Its Useful Life</h3><p>Depreciation allocates the cost of a tangible asset over the periods it helps generate revenue (matching principle). Three things needed: <strong style="color:var(--green)">Cost</strong>, <strong style="color:var(--gold)">Salvage Value</strong>, <strong style="color:var(--cyan)">Useful Life</strong>.</p></div><div class="lc"><div class="lcl">Straight-Line Method</div><div class="fblk"><div class="ft">Annual Dep = (Cost − Salvage) ÷ Useful Life</div><div class="fn">Equal amount expensed each year</div></div><div class="cblk"><span class="cl">// Machine: $50,000 cost, $5,000 salvage, 9-year life</span><div>Annual Dep = ($50,000 − $5,000) ÷ 9 = <span class="cdr">$5,000/yr</span></div><br><span class="cl">// Adjusting entry each year:</span><div><span class="cacc">Depreciation Expense</span> <span class="cdr">Dr. 5,000</span></div><div><span class="ccr">&nbsp;&nbsp;&nbsp;&nbsp;Accumulated Depreciation</span> <span class="ccr">Cr. 5,000</span></div></div><div class="hl">// Net Book Value = Cost − Accumulated Depreciation<br>// Year 3 NBV = $50,000 − $15,000 = $35,000</div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Equipment: $24,000 cost, $4,000 salvage, 5-year life. Annual straight-line depreciation?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) $4,800/year</button><button class="pqo" onclick="ca(this,true)">B) $4,000/year</button><button class="pqo" onclick="ca(this,false)">C) $5,000/year</button></div><div class="pqfb">✓ ($24,000 − $4,000) ÷ 5 = $4,000/year.</div></div></div><div class="lnav"><button class="btn-g" onclick="sp('tools')">Try Depreciation Simulator →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'inventory':{title:'Inventory Methods',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Which Units Were "Sold"?</h3><p>Cost flow assumptions determine how much COGS and ending inventory are reported when prices change.</p><div class="hl">// FIFO — First In, First Out. Oldest costs to COGS first.</div><div class="hl">// LIFO — Last In, First Out. Newest costs to COGS first. NOT allowed under IFRS.</div><div class="hl">// Weighted Avg — Average of all unit costs assigned to each unit sold.</div></div><div class="lc"><div class="lcl">Rising Prices Example</div><div class="cblk"><span class="cl">// Purchased: 10 units @ $10, then 10 units @ $14. Sold 10 units.</span><div>FIFO COGS = <span class="cdr">$100</span> <span class="cnote">// cheaper units sold first</span></div><div>LIFO COGS = <span class="ccr">$140</span> <span class="cnote">// pricier units sold first</span></div><div>Wtd Avg   = <span style="color:var(--cyan)">$120</span> <span class="cnote">// avg $12/unit</span></div><br><div class="cnote">// Rising prices: FIFO = higher income | LIFO = lower taxes</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">In rising prices, which method produces the HIGHEST net income?</div><div class="pqos"><button class="pqo" onclick="ca(this,true)">A) FIFO</button><button class="pqo" onclick="ca(this,false)">B) LIFO</button><button class="pqo" onclick="ca(this,false)">C) Weighted Average</button></div><div class="pqfb">✓ FIFO uses older, cheaper inventory → lower COGS → higher net income.</div></div></div><div class="lnav"><button class="btn-g" onclick="sp('tools')">Try Inventory Simulator →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`},
+'ratio-analysis':{title:'Ratio Analysis',body:`<div class="lc"><div class="lcl">Core Concept</div><h3>Reading the Financial Story</h3><p>Ratios convert raw financial data into meaningful comparisons across three categories: Liquidity, Profitability, and Leverage.</p></div><div class="lc"><div class="lcl">Key Formulas</div><div class="fblk"><div class="ft">Current Ratio = Current Assets ÷ Current Liabilities</div><div class="fn">Healthy: 1.5–3.0 | Short-term solvency</div></div><div class="fblk" style="margin-top:10px;"><div class="ft">Net Profit Margin = Net Income ÷ Net Sales × 100</div><div class="fn">% of each revenue dollar kept as profit</div></div><div class="fblk" style="margin-top:10px;"><div class="ft">Debt-to-Equity = Total Liabilities ÷ Total Equity</div><div class="fn">&lt;1.0 = low risk | &gt;2.0 = high leverage</div></div></div><div class="lc"><div class="lcl">Practice</div><div class="pq"><div class="pql">Question</div><div class="pqt">Current Assets = $90,000. Current Liabilities = $30,000. Current Ratio?</div><div class="pqos"><button class="pqo" onclick="ca(this,false)">A) 0.33</button><button class="pqo" onclick="ca(this,true)">B) 3.0</button><button class="pqo" onclick="ca(this,false)">C) 2.0</button></div><div class="pqfb">✓ $90,000 ÷ $30,000 = 3.0. For every $1 of debt, $3 of assets — very healthy.</div></div></div><div class="lnav"><button class="btn-g" onclick="sp('tools')">Try Ratio Analyzer →</button><button class="btn-gh" onclick="cl()">← All Lessons</button></div>`}
+};
+
+// SIM 1: EQUATION
+function resetEq(){const s=document.getElementById('eq-solve').value;let h='';if(s!=='assets')h+=`<div class="ig"><div class="igl">Assets ($)</div><input type="number" class="igi" id="eq-a" placeholder="100000"></div>`;if(s!=='liabilities')h+=`<div class="ig"><div class="igl">Liabilities ($)</div><input type="number" class="igi" id="eq-l" placeholder="40000"></div>`;if(s!=='equity')h+=`<div class="ig"><div class="igl">Owner's Equity ($)</div><input type="number" class="igi" id="eq-e" placeholder="60000"></div>`;document.getElementById('eq-inputs').innerHTML=h;document.getElementById('eq-res').classList.remove('show');}
+function calcEq(){const s=document.getElementById('eq-solve').value;const a=parseFloat(document.getElementById('eq-a')?.value)||0;const l=parseFloat(document.getElementById('eq-l')?.value)||0;const e=parseFloat(document.getElementById('eq-e')?.value)||0;let r,lbl,n;if(s==='assets'){r=l+e;lbl='Assets';n=`$${f(l)} + $${f(e)} = $${f(r)}`;}else if(s==='liabilities'){r=a-e;lbl='Liabilities';n=`$${f(a)} − $${f(e)} = $${f(r)}`;}else{r=a-l;lbl="Owner's Equity";n=`$${f(a)} − $${f(l)} = $${f(r)}`;}document.getElementById('eq-rv').textContent=`${lbl}: $${f(r)}`;document.getElementById('eq-rn').textContent=`// ${n}`;document.getElementById('eq-res').classList.add('show');}
+resetEq();
+
+// SIM 2: BREAK-EVEN
+function calcBE(){const fc=parseFloat(document.getElementById('be-fc').value);const sp=parseFloat(document.getElementById('be-sp').value);const vc=parseFloat(document.getElementById('be-vc').value);const out=document.getElementById('be-out');if(!fc||!sp||!vc||sp<=vc){out.style.display='none';return;}const cm=sp-vc;const units=Math.ceil(fc/cm);const sales=units*sp;document.getElementById('be-units').textContent=units.toLocaleString();document.getElementById('be-sales').textContent='$'+f(sales);document.getElementById('be-cm').textContent=`// CM/unit: $${f(cm)} | CM ratio: ${((cm/sp)*100).toFixed(1)}%`;out.style.display='block';drawBE(fc,sp,vc,units);}
+function drawBE(fc,sp,vc,bu){const c=document.getElementById('beC');const ctx=c.getContext('2d');c.width=c.parentElement.offsetWidth-14;c.height=81;const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);const maxU=bu*2;const maxR=maxU*sp;const px=u=>(u/maxU)*w;const py=v=>h-(v/maxR)*h;ctx.strokeStyle='rgba(74,102,112,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(w,h);ctx.stroke();ctx.strokeStyle='rgba(255,68,102,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(0,py(fc));ctx.lineTo(w,py(fc));ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='rgba(255,68,102,0.75)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,py(fc));ctx.lineTo(px(maxU),py(fc+vc*maxU));ctx.stroke();ctx.strokeStyle='rgba(0,255,157,0.75)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(px(maxU),py(sp*maxU));ctx.stroke();const bx=px(bu),by=py(sp*bu);ctx.fillStyle='rgba(240,192,64,1)';ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);ctx.fill();document.getElementById('be-lbl').textContent=`// green=revenue | red=total cost | dot=break-even (${bu.toLocaleString()} units)`;}
+
+// SIM 3: T-ACCOUNT
+let taDr=[],taCr=[];
+function addTA(){const a=parseFloat(document.getElementById('ta-amt').value);const s=document.getElementById('ta-side').value;if(!a||a<=0)return;if(s==='debit')taDr.push(a);else taCr.push(a);document.getElementById('ta-amt').value='';renderTA();}
+function clrTA(){taDr=[];taCr=[];renderTA();}
+function renderTA(){const dt=taDr.reduce((a,b)=>a+b,0);const ct=taCr.reduce((a,b)=>a+b,0);document.getElementById('ta-dr').innerHTML=taDr.length?taDr.map(d=>`$${f(d)}`).join('<br>'):'—';document.getElementById('ta-cr').innerHTML=taCr.length?taCr.map(c=>`$${f(c)}`).join('<br>'):'—';document.getElementById('ta-dt').textContent='$'+f(dt);document.getElementById('ta-ct').textContent='$'+f(ct);const bal=dt-ct;const b=document.getElementById('ta-bal');if(bal===0){b.textContent='Balance: $0.00 (Balanced ✓)';b.style.color='var(--green)';}else if(bal>0){b.textContent=`Debit Balance: $${f(Math.abs(bal))}`;b.style.color='var(--green)';}else{b.textContent=`Credit Balance: $${f(Math.abs(bal))}`;b.style.color='var(--gold)';}}
+
+// SIM 4: RATIOS
+function calcRatios(){const ca=parseFloat(document.getElementById('r-ca').value);const cl=parseFloat(document.getElementById('r-cl').value);const ta=parseFloat(document.getElementById('r-ta').value);const tl=parseFloat(document.getElementById('r-tl').value);const ni=parseFloat(document.getElementById('r-ni').value);const s=parseFloat(document.getElementById('r-s').value);if(!ca||!cl||!ta||!tl||!ni||!s){alert('Please fill all fields.');return;}const eq=ta-tl;const cr=ca/cl,dte=tl/eq,npm=(ni/s)*100,roa=(ni/ta)*100;document.getElementById('r-cur').textContent=cr.toFixed(2);document.getElementById('r-cip').textContent=cr>=2?'✓ Strong':cr>=1?'⚠ Adequate':'✗ Weak';document.getElementById('r-cip').className='rp '+(cr>=2?'rg':cr>=1?'rw':'rb');document.getElementById('r-dte').textContent=dte.toFixed(2);document.getElementById('r-dip').textContent=dte<1?'✓ Low risk':dte<2?'⚠ Moderate':'✗ High leverage';document.getElementById('r-dip').className='rp '+(dte<1?'rg':dte<2?'rw':'rb');document.getElementById('r-npm').textContent=npm.toFixed(1)+'%';document.getElementById('r-nip').textContent=npm>10?'✓ Excellent':npm>5?'~ Average':'⚠ Thin margin';document.getElementById('r-nip').className='rp '+(npm>10?'rg':npm>5?'rw':'rb');document.getElementById('r-roa').textContent=roa.toFixed(1)+'%';document.getElementById('r-rip').textContent=roa>10?'✓ Strong':roa>5?'~ Average':'⚠ Review';document.getElementById('r-rip').className='rp '+(roa>10?'rg':roa>5?'rw':'rb');document.getElementById('ratio-res').style.display='block';}
+
+// SIM 5: QUIZ
+const allQ=[{q:"Assets=$120k, Liabilities=$45k. Equity?",opts:["$165k","$75k","$45k","$120k"],a:1},{q:"Normal CREDIT balance account?",opts:["Cash","Equipment","Accounts Payable","Supplies"],a:2},{q:"Statement showing net income?",opts:["Balance Sheet","Cash Flow","Income Statement","Equity Statement"],a:2},{q:"Debit Cash / Credit Revenue means:",opts:["Cash paid out","Revenue earned and collected","Liability paid","Expense recognized"],a:1},{q:"Accounting equation must always:",opts:["Show profit","Balance at all times","Assets > Liabilities","Be prepared monthly"],a:1},{q:"Depreciation is credited to:",opts:["Dep. Expense","Cash","Accumulated Depreciation","Equipment"],a:2},{q:"FIFO in rising prices — COGS is:",opts:["Higher than LIFO","Lower than LIFO","Same as LIFO","Not affected"],a:1},{q:"Allowance for Doubtful Accounts is a:",opts:["Liability","Normal asset","Contra-asset","Revenue"],a:2},{q:"Adjusting entries are made:",opts:["Start of period","Only for errors","End of period","When cash received"],a:2},{q:"Current Ratio formula:",opts:["CA ÷ Total Assets","CA ÷ CL","Net Income ÷ Sales","Total Liab ÷ Equity"],a:1},{q:"Revenue recognized under accrual:",opts:["When cash collected","When earned","When invoiced","When ordered"],a:1},{q:"Closing entries go to:",opts:["Cash","AR","Retained Earnings","Income Summary only"],a:2},{q:"A debit INCREASES which account?",opts:["Liabilities","Revenue","Equity","Expenses"],a:3},{q:"Net Book Value =",opts:["Cost + Salvage","Cost − Accum. Dep.","Accum Dep ÷ Life","Salvage × Life"],a:1},{q:"Allowance Method matches bad debt expense to:",opts:["Cash collected","Period revenue earned","Write-off date","Year-end only"],a:1},{q:"Income Statement is prepared:",opts:["After Balance Sheet","Before Balance Sheet","Same time as Cash Flows","Last in cycle"],a:1},{q:"CPA stands for:",opts:["Certified Professional Auditor","Certified Public Accountant","Corporate Planning Analyst","Cash Position Analyst"],a:1},{q:"Left side of T-account is the:",opts:["Credit side","Balance","Debit side","Total"],a:2},{q:"LIFO is NOT allowed under:",opts:["US GAAP","IFRS","IRS rules","State law"],a:1},{q:"Net Profit Margin =",opts:["Gross Profit ÷ Sales","NI ÷ Total Assets","NI ÷ Net Sales","Revenue ÷ Expenses"],a:2}];
+let qQs=[],qI=0,qS=0;
+function initQ(){qQs=[...allQ].sort(()=>Math.random()-.5).slice(0,10);qI=0;qS=0;renderQ();}
+function renderQ(){if(qI>=qQs.length){const pct=Math.round((qS/qQs.length)*100);const g=pct>=90?'🏆 Expert':pct>=70?'✅ Solid':pct>=50?'📚 Keep Studying':'💪 Review Lessons';document.getElementById('quiz-con').innerHTML=`<div class="qscr"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);letter-spacing:.2em;text-transform:uppercase;margin-bottom:7px;">// FINAL SCORE</div><div class="qbig">${qS}/${qQs.length}</div><div class="qgrd">${g}</div><div class="qpct">${pct}% accuracy</div><button onclick="initQ()" style="margin-top:18px;background:var(--green);color:var(--bg);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:11px 26px;border:none;border-radius:4px;cursor:pointer;">RETRY QUIZ</button></div>`;return;}const q=qQs[qI];let dots='';for(let i=0;i<qQs.length;i++)dots+=`<div class="qpd ${i<qI?'done':i===qI?'active':''}"></div>`;document.getElementById('qp').innerHTML=dots;document.getElementById('qq').textContent=`${qI+1}. ${q.q}`;document.getElementById('qopts').innerHTML=q.opts.map((o,i)=>`<button class="qopt" onclick="ansQ(this,${i})">${o}</button>`).join('');document.getElementById('qstat').textContent=`// score: ${qS}/${qI} | remaining: ${qQs.length-qI}`;}
+function ansQ(btn,idx){const q=qQs[qI];document.querySelectorAll('.qopt').forEach(o=>o.disabled=true);if(idx===q.a){btn.classList.add('correct');qS++;}else{btn.classList.add('wrong');document.querySelectorAll('.qopt')[q.a].classList.add('correct');}setTimeout(()=>{qI++;renderQ();},1050);}
+initQ();
+
+// SIM 6: INCOME STMT
+function calcIS(){const s=parseFloat(document.getElementById('is-s').value)||0;const cg=parseFloat(document.getElementById('is-cg').value)||0;const sal=parseFloat(document.getElementById('is-sal').value)||0;const rnt=parseFloat(document.getElementById('is-rnt').value)||0;const oth=parseFloat(document.getElementById('is-oth').value)||0;const gp=s-cg;const ni=gp-(sal+rnt+oth);const ge=document.getElementById('is-gp');const ne=document.getElementById('is-ni');ge.textContent='$'+f(gp);ge.className='lv'+(gp<0?' neg':'');ne.textContent='$'+f(ni);ne.className='lv'+(ni<0?' neg':'');if(s>0)document.getElementById('is-mg').textContent=`// Net margin: ${((ni/s)*100).toFixed(1)}% | Gross margin: ${((gp/s)*100).toFixed(1)}%`;}
+
+// SIM 7: DEPRECIATION
+function calcDep(){const cost=parseFloat(document.getElementById('d-cost').value);const sv=parseFloat(document.getElementById('d-sv').value)||0;const life=parseInt(document.getElementById('d-life').value);const m=document.getElementById('d-m').value;if(!cost||!life||life<1){alert('Enter valid values.');return;}const res=document.getElementById('dep-res');let rows='';let nbv=cost,tot=0;const dep=cost-sv;const hdr=`<table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.7rem;"><tr style="background:var(--surface2);"><th style="padding:7px;text-align:left;color:var(--green);">Year</th><th style="padding:7px;text-align:right;color:var(--green);">Dep. Exp.</th><th style="padding:7px;text-align:right;color:var(--green);">Accum. Dep.</th><th style="padding:7px;text-align:right;color:var(--green);">Net BV</th></tr>`;
+if(m==='sl'){const a=dep/life;for(let y=1;y<=life;y++){tot+=a;nbv-=a;rows+=`<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:7px;color:var(--text);">${y}</td><td style="padding:7px;text-align:right;color:var(--cyan);">$${f(a)}</td><td style="padding:7px;text-align:right;color:var(--gray);">$${f(tot)}</td><td style="padding:7px;text-align:right;color:var(--green);">$${f(Math.max(sv,nbv))}</td></tr>`;}}
+else if(m==='ddb'){const rate=2/life;for(let y=1;y<=life;y++){let d=nbv*rate;if(nbv-d<sv)d=Math.max(0,nbv-sv);tot+=d;nbv-=d;rows+=`<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:7px;color:var(--text);">${y}</td><td style="padding:7px;text-align:right;color:var(--cyan);">$${f(d)}</td><td style="padding:7px;text-align:right;color:var(--gray);">$${f(tot)}</td><td style="padding:7px;text-align:right;color:var(--green);">$${f(nbv)}</td></tr>`;}}
+else{const syd=life*(life+1)/2;for(let y=1;y<=life;y++){const d=dep*((life-y+1)/syd);tot+=d;nbv-=d;rows+=`<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:7px;color:var(--text);">${y}</td><td style="padding:7px;text-align:right;color:var(--cyan);">$${f(d)}</td><td style="padding:7px;text-align:right;color:var(--gray);">$${f(tot)}</td><td style="padding:7px;text-align:right;color:var(--green);">$${f(Math.max(sv,nbv))}</td></tr>`;}}
+res.innerHTML=hdr+rows+'</table>';res.style.display='block';}
+
+// SIM 8: INVENTORY
+function addInvRow(){const d=document.createElement('div');d.className='igr inv-row';d.style.marginBottom='9px';d.innerHTML=`<div class="ig"><div class="igl">Units</div><input type="number" class="igi inv-u" placeholder="100"></div><div class="ig"><div class="igl">Cost/Unit ($)</div><input type="number" class="igi inv-c" placeholder="0"></div>`;document.getElementById('inv-rows').appendChild(d);}
+function calcInv(){const units=[...document.querySelectorAll('.inv-u')].map(i=>parseFloat(i.value)||0);const costs=[...document.querySelectorAll('.inv-c')].map(i=>parseFloat(i.value)||0);const sold=parseFloat(document.getElementById('inv-sold').value)||0;const tot=units.reduce((a,b)=>a+b,0);if(sold>tot){alert('Units sold exceeds total purchased.');return;}let fifo=0,rem=sold;for(let i=0;i<units.length&&rem>0;i++){const t=Math.min(units[i],rem);fifo+=t*costs[i];rem-=t;}let lifo=0;rem=sold;for(let i=units.length-1;i>=0&&rem>0;i--){const t=Math.min(units[i],rem);lifo+=t*costs[i];rem-=t;}const totC=units.reduce((s,u,i)=>s+u*costs[i],0);const avg=totC/tot;const wa=sold*avg;const res=document.getElementById('inv-res');res.innerHTML=`<div class="cblk" style="font-size:.72rem;"><span class="cl">// ${sold} units sold of ${tot} available</span><div>FIFO COGS = <span class="cdr">$${f(fifo)}</span> <span class="cnote">// ending inv: $${f(totC-fifo)}</span></div><div>LIFO COGS = <span class="ccr">$${f(lifo)}</span> <span class="cnote">// ending inv: $${f(totC-lifo)}</span></div><div>Wtd Avg   = <span style="color:var(--cyan)">$${f(wa)}</span> <span class="cnote">// avg: $${avg.toFixed(4)}/unit</span></div><br><div class="cnote">// ${lifo>fifo?'Rising prices: FIFO=higher income, LIFO=higher COGS':'Falling prices: LIFO=higher income, FIFO=higher COGS'}</div></div>`;res.style.display='block';}
+
+// BILL DRAG
+const B=document.getElementById('bill');let drag=false,sx=0,rot=0;
+B.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;B.style.animationPlayState='paused';});
+document.addEventListener('mousemove',e=>{if(!drag)return;rot+=(e.clientX-sx)*0.5;B.style.transform=`rotateY(${rot}deg) rotateX(8deg)`;sx=e.clientX;});
+document.addEventListener('mouseup',()=>{if(drag){drag=false;B.style.animationPlayState='running';}});
+B.addEventListener('touchstart',e=>{drag=true;sx=e.touches[0].clientX;B.style.animationPlayState='paused';},{passive:true});
+document.addEventListener('touchmove',e=>{if(!drag)return;rot+=(e.touches[0].clientX-sx)*0.5;B.style.transform=`rotateY(${rot}deg) rotateX(8deg)`;sx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',()=>{drag=false;B.style.animationPlayState='running';});
+
+// CHEAT SHEETS
+function dl(t){const s={formulas:`ACCOUNTING MASTER — FORMULA SHEET\n${'='.repeat(50)}\nACCOUNTING EQUATION\n  Assets = Liabilities + Owner's Equity\nINCOME STATEMENT\n  Gross Profit = Net Sales - COGS\n  Net Income = Gross Profit - Operating Expenses\nDEPRECIATION\n  Annual SL = (Cost - Salvage) / Useful Life\n  DDB = Book Value x (2 / Useful Life)\n  Net Book Value = Cost - Accumulated Depreciation\nLIQUIDITY\n  Current Ratio = Current Assets / Current Liabilities\n  Quick Ratio = (Cash + AR) / Current Liabilities\nPROFITABILITY\n  Gross Margin = Gross Profit / Net Sales\n  Net Profit Margin = Net Income / Net Sales\n  ROA = Net Income / Total Assets\n  ROE = Net Income / Equity\nBREAK-EVEN\n  CM/Unit = Selling Price - Variable Cost\n  Break-Even Units = Fixed Costs / CM per Unit`,taccounts:`ACCOUNTING MASTER — T-ACCOUNT TEMPLATE\n${'='.repeat(50)}\n\n         ACCOUNT NAME\n  ____________________________\n |           |               |\n |  DEBIT    |   CREDIT      |\n |  (Left)   |   (Right)     |\n |___________|_______________|\n\nRULES:\n  Assets     -> Normal Balance: DEBIT\n  Liabilities -> Normal Balance: CREDIT\n  Equity     -> Normal Balance: CREDIT\n  Revenue    -> Normal Balance: CREDIT\n  Expenses   -> Normal Balance: DEBIT\n\nTotal Debits ALWAYS equal Total Credits.`,'debit-credit':`ACCOUNTING MASTER — DEBIT/CREDIT RULES\n${'='.repeat(50)}\nACCOUNT        | NORMAL | DR     | CR\nAssets         | Debit  | Incr.  | Decr.\nLiabilities    | Credit | Decr.  | Incr.\nOwner's Equity | Credit | Decr.  | Incr.\nRevenue        | Credit | Decr.  | Incr.\nExpenses       | Debit  | Incr.  | Decr.\nDividends      | Debit  | Incr.  | Decr.\n\nMEMORY:\nDEAL = Debits increase: Dividends, Expenses, Assets, Losses\nGICL = Credits increase: Gains, Income, Capital, Liabilities`,ratios:`ACCOUNTING MASTER — KEY RATIOS\n${'='.repeat(50)}\nLIQUIDITY\n  Current Ratio = CA / CL  (good: >1.5)\n  Quick Ratio = (Cash+AR) / CL  (good: >1.0)\nPROFITABILITY\n  Gross Margin = Gross Profit / Sales\n  Net Profit Margin = Net Income / Sales\n  ROA = Net Income / Total Assets\n  ROE = Net Income / Equity\nLEVERAGE\n  Debt Ratio = Total Liab / Total Assets\n  D/E Ratio = Total Liab / Equity  (<1.0 low | >2.0 high)\nACTIVITY\n  Inv. Turnover = COGS / Avg Inventory\n  AR Turnover = Net Sales / Avg AR\n  Asset Turnover = Net Sales / Total Assets`};const b=new Blob([s[t]],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`am-${t}.txt`;a.click();URL.revokeObjectURL(u);}
+
+function f(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+</script></body></html>
