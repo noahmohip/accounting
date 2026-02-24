@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accounting Master | Learning Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5f7fa;
+      --surface:#ffffff;
+      --surface2:#f1f5f9;
+      --text:#0f172a;
+      --muted:#475569;
+      --border:#e2e8f0;
+      --shadow:0 10px 30px rgba(2,6,23,.08);
+      --primary:#0b3d2e;
+      --accent:#0f766e;
+      --accent2:#1d4ed8;
+      --good:#16a34a;
+      --warn:#b45309;
+      --bad:#dc2626;
+      --radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+
+    /* Topbar */
+    .topbar{
+      position:sticky;top:0;z-index:50;
+      background:rgba(255,255,255,.85);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1200px;margin:0 auto;
+      display:flex;align-items:center;gap:14px;
+      padding:14px 18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      font-weight:800;letter-spacing:-.02em;
+      color:var(--primary);
+      cursor:pointer;
+      user-select:none;
+    }
+    .brand-badge{
+      width:34px;height:34px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--primary));
+      box-shadow:0 10px 25px rgba(15,118,110,.25);
+      display:grid;place-items:center;color:white;font-weight:800;
+    }
+    .brand small{display:block;color:var(--muted);font-weight:600;letter-spacing:0;}
+    .spacer{flex:1;}
+    .pill{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border:1px solid var(--border);
+      border-radius:999px;background:var(--surface);
+      box-shadow:0 10px 25px rgba(2,6,23,.04);
+    }
+    .pill label{font-size:12px;color:var(--muted);font-weight:700;}
+    select{
+      border:0;background:transparent;
+      font-weight:700;color:var(--text);
+      outline:none;
+      cursor:pointer;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background:var(--surface);
+      padding:10px 12px;border-radius:12px;
+      cursor:pointer;font-weight:800;
+      color:var(--text);
+      box-shadow:0 10px 25px rgba(2,6,23,.04);
+      transition:transform .15s ease, box-shadow .15s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(2,6,23,.08);}
+    .btn.primary{
+      border-color:transparent;
+      background:linear-gradient(135deg,var(--accent),var(--primary));
+      color:white;
+    }
+
+    /* Layout */
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 18px 70px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+    body.sidebar-hidden .grid{ grid-template-columns: 1fr; }
+    body.sidebar-hidden .content{ max-width: 980px; margin: 0 auto; }
+
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr;}
+      .sidebar{position:relative;top:auto;}
+      body.sidebar-hidden .content{max-width:unset;}
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:sticky;top:82px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    body.sidebar-hidden .sidebar{display:none;}
+    .sidebar-head{
+      padding:18px 18px 14px;
+      background:linear-gradient(180deg,var(--surface2),var(--surface));
+      border-bottom:1px solid var(--border);
+    }
+    .sidebar-title{font-size:14px;font-weight:900;color:var(--text);}
+    .sidebar-sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45;}
+    .chapters{ padding:10px; display:grid; gap:8px; }
+    .chapter-btn{
+      width:100%;
+      text-align:left;
+      border:1px solid var(--border);
+      background:var(--surface);
+      padding:12px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      display:flex;align-items:flex-start;gap:10px;
+      transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+    .chapter-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(2,6,23,.06);}
+    .chapter-btn.active{border-color:rgba(15,118,110,.45);box-shadow:0 16px 34px rgba(15,118,110,.12);}
+    .chapter-num{
+      min-width:36px;height:36px;border-radius:12px;
+      background:rgba(15,118,110,.10);
+      display:grid;place-items:center;
+      font-weight:900;color:var(--accent);
+    }
+    .chapter-meta b{display:block;font-size:13px;line-height:1.25;}
+    .chapter-meta span{display:block;margin-top:4px;font-size:12px;color:var(--muted);line-height:1.35;}
+
+    /* Content */
+    .content{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hero{
+      padding:26px 22px 20px;
+      border-bottom:1px solid var(--border);
+      background:
+        radial-gradient(1200px 260px at 20% 0%, rgba(15,118,110,.14), transparent 55%),
+        radial-gradient(1200px 260px at 80% 0%, rgba(29,78,216,.10), transparent 55%),
+        linear-gradient(180deg, var(--surface2), var(--surface));
+      text-align:center;
+    }
+    .hero h1{font-size:24px;letter-spacing:-.02em;}
+    .hero p{margin:10px auto 0;color:var(--muted);line-height:1.65;font-size:13px;max-width:70ch;}
+    .hero-actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+
+    .section{ padding:22px; border-top:1px solid var(--border); }
+    .section:first-of-type{border-top:0;}
+    .section h2{font-size:15px;margin-bottom:10px;letter-spacing:-.01em;}
+    .section .muted{color:var(--muted);font-size:13px;line-height:1.65;margin-top:4px;}
+    .cards{display:grid;gap:12px;margin-top:14px;}
+    .card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:var(--surface);
+      padding:16px;
+      box-shadow:0 10px 25px rgba(2,6,23,.04);
+    }
+    .card h3{font-size:13px;margin-bottom:8px;}
+    .kvs{display:grid;gap:8px;}
+    .kv{display:flex;gap:10px;align-items:flex-start;}
+    .tag{
+      font-size:11px;font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:var(--surface2);
+      white-space:nowrap;
+    }
+    .eq{
+      border:1px dashed rgba(15,118,110,.45);
+      background:rgba(15,118,110,.07);
+      padding:14px 14px;
+      border-radius:14px;
+      font-weight:900;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;
+      margin-top:10px;
+    }
+    .eq code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight:900;
+      font-size:13px;
+    }
+    .eq button{
+      border:1px solid rgba(15,118,110,.35);
+      background:white;
+      color:var(--accent);
+      padding:8px 10px;border-radius:12px;
+      cursor:pointer;font-weight:900;
+    }
+
+    .quiz{ display:grid;gap:12px;margin-top:12px; }
+    .q{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:var(--surface2);
+    }
+    .q label{display:block;font-weight:900;margin-bottom:8px;font-size:13px;}
+    .q input{
+      width:100%;
+      border:1px solid var(--border);
+      background:white;
+      padding:10px 12px;border-radius:12px;
+      outline:none;
+      font-weight:800;
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    .note{ font-size:12px;color:var(--muted); }
+    .result{
+      font-weight:900;font-size:12px;
+      padding:8px 10px;border-radius:12px;
+      border:1px solid var(--border);
+      background:white;
+      display:inline-block;
+    }
+    .result.good{border-color:rgba(22,163,74,.35); color:var(--good); background:rgba(22,163,74,.06);}
+    .result.bad{border-color:rgba(220,38,38,.35); color:var(--bad); background:rgba(220,38,38,.06);}
+    .result.warn{border-color:rgba(180,83,9,.35); color:var(--warn); background:rgba(180,83,9,.06);}
+
+    .flashcard{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      background:white;
+      cursor:pointer;
+      min-height:92px;
+      display:flex;align-items:center;justify-content:center;
+      text-align:center;
+      font-weight:900;
+      box-shadow:0 10px 25px rgba(2,6,23,.04);
+      user-select:none;
+    }
+
+    /* Equation visualizer (sliders) */
+    .sliderGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 780px){ .sliderGrid{grid-template-columns:1fr;} }
+
+    .sliderCard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:var(--surface2);
+      padding:14px;
+    }
+    .sliderCard label{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      font-weight:900;font-size:12px;margin-bottom:10px;
+    }
+    .sliderCard label span{color:var(--muted);font-weight:900;}
+    input[type="range"]{width:100%;}
+    .mini{ font-size:12px;color:var(--muted);line-height:1.55;margin-top:10px; }
+
+    /* Journal tool */
+    .jeGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 140px 120px;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width: 920px){ .jeGrid{grid-template-columns:1fr 1fr; } }
+    .jeGrid select, .jeGrid input{
+      width:100%;
+      border:1px solid var(--border);
+      background:white;
+      padding:10px 12px;border-radius:12px;
+      font-weight:800;outline:none;
+    }
+    .tableWrap{
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      background:white;
+    }
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    thead{background:var(--surface2);border-bottom:1px solid var(--border);}
+    th,td{padding:10px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+    tbody tr:last-child td{border-bottom:none;}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .balances{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 760px){ .balances{grid-template-columns:1fr;} }
+    .bal{
+      border:1px solid var(--border);
+      background:white;
+      border-radius:16px;
+      padding:12px;
+      box-shadow:0 10px 25px rgba(2,6,23,.04);
+    }
+    .bal .k{font-size:11px;color:var(--muted);font-weight:900;letter-spacing:.02em;}
+    .bal .v{margin-top:6px;font-weight:900;font-size:16px;}
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:22px 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" onclick="goHome()">
+        <div class="brand-badge">AM</div>
+        <div>
+          Accounting Master
+          <small>Learning Portal • 14 Chapters</small>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="pill" title="Switch chapters">
+        <label for="chapterSelect">Chapter</label>
+        <select id="chapterSelect" onchange="selectChapterFromDropdown()">
+          <option value="1" selected>Chapter 1 — Intro to Accounting & Business</option>
+          <option value="2">Chapter 2 — (Coming Soon)</option>
+          <option value="3">Chapter 3 — (Coming Soon)</option>
+          <option value="4">Chapter 4 — (Coming Soon)</option>
+          <option value="5">Chapter 5 — (Coming Soon)</option>
+          <option value="6">Chapter 6 — (Coming Soon)</option>
+          <option value="7">Chapter 7 — (Coming Soon)</option>
+          <option value="8">Chapter 8 — (Coming Soon)</option>
+          <option value="9">Chapter 9 — (Coming Soon)</option>
+          <option value="10">Chapter 10 — (Coming Soon)</option>
+          <option value="11">Chapter 11 — (Coming Soon)</option>
+          <option value="12">Chapter 12 — (Coming Soon)</option>
+          <option value="13">Chapter 13 — (Coming Soon)</option>
+          <option value="14">Chapter 14 — (Coming Soon)</option>
+        </select>
+      </div>
+
+      <button class="btn" id="sidebarToggleBtn" onclick="toggleSidebar()">Hide Chapters</button>
+      <button class="btn" onclick="toggleStudyMode()">Study Mode</button>
+      <button class="btn primary" onclick="openMastery()">Mastery Check</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <aside class="sidebar" aria-label="Chapters">
+        <div class="sidebar-head">
+          <div class="sidebar-title">Chapters</div>
+          <div class="sidebar-sub">This project is built for 14 total chapters. Chapter 1 is fully active right now.</div>
+        </div>
+        <div class="chapters" id="chapterList"></div>
+      </aside>
+
+      <main class="content" aria-label="Chapter content">
+        <div class="hero" id="hero">
+          <h1 id="heroTitle">Chapter 1 — Introduction to Accounting & Business</h1>
+          <p id="heroDesc">
+            Corporate lesson flow: objectives, definitions, formulas, quizzes, flashcards, plus tools that visually prove the accounting equation always stays balanced.
+          </p>
+          <div class="hero-actions">
+            <button class="btn primary" onclick="scrollTo('eqviz')">Equation Visualizer</button>
+            <button class="btn" onclick="scrollTo('journalTool')">Journal Entry Tool</button>
+            <button class="btn" onclick="scrollTo('obj1')">Objective 1</button>
+          </div>
+        </div>
+
+        <section class="section" id="chapter1">
+          <h2>Learning Objectives</h2>
+          <p class="muted">
+            Objective 1: Nature of business + role of accounting + ethics. • Objective 2: GAAP assumptions + principles. • Objective 3: Accounting equation.
+            • Objective 4: Transactions and equation changes. • Objective 5: Financial statements + interrelationships.
+          </p>
+
+          <div class="cards">
+
+            <div class="card" id="eqviz">
+              <h3>Accounting Equation Visualizer (Sliders)</h3>
+              <p class="muted">
+                Move the sliders to see how the accounting equation balances. In <b>Auto-Balance</b>, changing Assets will automatically split the matching change between Liabilities and Equity.
+              </p>
+
+              <div class="sliderGrid">
+                <div class="sliderCard">
+                  <label>Auto-Balance <span id="abStatus">ON</span></label>
+                  <div class="row" style="margin-top:0;">
+                    <button class="btn primary" onclick="toggleAutoBalance()">Toggle</button>
+                    <button class="btn" onclick="resetSliders()">Reset</button>
+                  </div>
+                  <div class="mini">
+                    Auto-Balance rule: ΔAssets = ΔLiabilities + ΔEquity<br>
+                    Split uses the <b>Liabilities vs Equity</b> slider.
+                  </div>
+                </div>
+
+                <div class="sliderCard">
+                  <label>Liabilities vs Equity Split <span id="splitLabel">50% L / 50% E</span></label>
+                  <input type="range" min="0" max="100" value="50" id="splitSlider" oninput="updateSplitLabel(); syncFromAssets();" />
+                  <div class="mini">If Assets increase by $100 and split is 70% liabilities, then L increases $70 and E increases $30.</div>
+                </div>
+
+                <div class="sliderCard">
+                  <label>ΔAssets <span id="aVal" class="mono">$0</span></label>
+                  <input type="range" min="-5000" max="5000" value="0" step="50" id="assetsSlider" oninput="syncFromAssets()" />
+                </div>
+
+                <div class="sliderCard">
+                  <label>ΔLiabilities <span id="lVal" class="mono">$0</span></label>
+                  <input type="range" min="-5000" max="5000" value="0" step="50" id="liabSlider" oninput="manualChange('L')" />
+                </div>
+
+                <div class="sliderCard">
+                  <label>ΔEquity <span id="eVal" class="mono">$0</span></label>
+                  <input type="range" min="-5000" max="5000" value="0" step="50" id="eqSlider" oninput="manualChange('E')" />
+                </div>
+
+                <div class="sliderCard">
+                  <label>Status <span id="eqStatus" class="mono">Balanced ✅</span></label>
+                  <div class="eq" style="margin-top:0;">
+                    <code id="eqLine">ΔA ($0) = ΔL ($0) + ΔE ($0)</code>
+                    <button onclick="copyText(document.getElementById('eqLine').innerText)">Copy</button>
+                  </div>
+                  <div class="mini" id="eqHint">Try moving Assets. Watch Liabilities + Equity change to match.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" id="journalTool">
+              <h3>Journal Entries → Automatic A/L/E Balance Changes</h3>
+              <p class="muted">
+                Add a journal entry (Debit + Credit). The tool updates running totals of <b>Assets, Liabilities, Equity</b> and shows the equation after every entry.
+              </p>
+
+              <div class="jeGrid">
+                <select id="debitType" aria-label="Debit account type">
+                  <option value="Asset">Debit: Asset</option>
+                  <option value="Expense">Debit: Expense</option>
+                  <option value="Dividends">Debit: Dividends</option>
+                  <option value="Liability">Debit: Liability</option>
+                  <option value="Equity">Debit: Equity</option>
+                  <option value="Revenue">Debit: Revenue</option>
+                </select>
+
+                <select id="creditType" aria-label="Credit account type">
+                  <option value="Liability" selected>Credit: Liability</option>
+                  <option value="Equity">Credit: Equity</option>
+                  <option value="Revenue">Credit: Revenue</option>
+                  <option value="Asset">Credit: Asset</option>
+                  <option value="Expense">Credit: Expense</option>
+                  <option value="Dividends">Credit: Dividends</option>
+                </select>
+
+                <input id="jeAmount" type="number" min="0" step="1" placeholder="Amount" />
+                <button class="btn primary" onclick="addEntry()">Add Entry</button>
+              </div>
+
+              <div class="row">
+                <button class="btn" onclick="undoEntry()">Undo Last</button>
+                <button class="btn" onclick="resetJournal()">Reset Journal</button>
+                <span id="jeStatus" class="result"></span>
+              </div>
+
+              <div class="balances">
+                <div class="bal">
+                  <div class="k">Assets</div>
+                  <div class="v mono" id="balA">$0</div>
+                </div>
+                <div class="bal">
+                  <div class="k">Liabilities</div>
+                  <div class="v mono" id="balL">$0</div>
+                </div>
+                <div class="bal">
+                  <div class="k">Equity</div>
+                  <div class="v mono" id="balE">$0</div>
+                </div>
+              </div>
+
+              <div class="eq" style="margin-top:12px;">
+                <code id="balEqLine">A ($0) = L ($0) + E ($0)</code>
+                <button onclick="copyText(document.getElementById('balEqLine').innerText)">Copy</button>
+              </div>
+
+              <div class="tableWrap" aria-label="Journal entries table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Debit</th>
+                      <th>Credit</th>
+                      <th>Amount</th>
+                      <th>ΔAssets</th>
+                      <th>ΔLiabilities</th>
+                      <th>ΔEquity</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jeBody">
+                    <tr><td colspan="7" style="color:var(--muted);">No entries yet.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p class="mini">
+                Debit/Credit logic (mapped to A/L/E):<br>
+                • Debits: Assets ↑, Expenses ↑ (Equity ↓), Dividends ↑ (Equity ↓), Liabilities ↓, Equity ↓, Revenue ↓ (Equity ↓)<br>
+                • Credits: Assets ↓, Expenses ↓ (Equity ↑), Dividends ↓ (Equity ↑), Liabilities ↑, Equity ↑, Revenue ↑ (Equity ↑)
+              </p>
+            </div>
+
+            <div class="card" id="obj1">
+              <h3>Objective 1 — Nature of Business & Accounting</h3>
+              <div class="kvs">
+                <div class="kv"><span class="tag">Business</span><div>An organization that transforms inputs (resources) into outputs (goods/services) to customers.</div></div>
+                <div class="kv"><span class="tag">Profit</span><div>The difference between amounts received from customers and amounts paid for inputs.</div></div>
+              </div>
+              <div class="eq">
+                <code>Profit = Revenues − Expenses</code>
+                <button onclick="copyText('Profit = Revenues - Expenses')">Copy</button>
+              </div>
+
+              <div class="quiz">
+                <div class="q">
+                  <label>Mini Quiz: What is profit equal to?</label>
+                  <input id="q_profit" placeholder="Type the formula in words or symbols" />
+                  <div class="row">
+                    <button class="btn primary" onclick="checkProfit()">Check</button>
+                    <span id="r_profit" class="result"></span>
+                    <span class="note">Tip: include both Revenues and Expenses.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" id="obj2">
+              <h3>Objective 2 — GAAP (Generally Accepted Accounting Principles)</h3>
+              <p class="muted">GAAP is the guideline framework used when preparing financial statements.</p>
+
+              <div class="kvs" style="margin-top:10px;">
+                <div class="kv"><span class="tag">Assumptions</span><div>Monetary unit • Time period • Business entity • Going concern</div></div>
+                <div class="kv"><span class="tag">Principles</span><div>Measurement • Historical cost • Revenue recognition • Expense recognition (matching)</div></div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div class="flashcard" id="fc1" onclick="flipCard()">
+                  Click to Reveal: What does GAAP stand for?
+                </div>
+                <p class="note" style="margin-top:10px;">Flashcards are built-in so you can add dozens more later per chapter.</p>
+              </div>
+            </div>
+
+            <div class="card" id="obj5">
+              <h3>Objective 5 — Financial Statements</h3>
+              <p class="muted">The primary financial statements of a corporation (in order prepared):</p>
+              <div class="kvs" style="margin-top:10px;">
+                <div class="kv"><span class="tag">1</span><div><b>Income Statement</b> — revenues and expenses for a period of time.</div></div>
+                <div class="kv"><span class="tag">2</span><div><b>Retained Earnings Statement</b> — changes in retained earnings during a period.</div></div>
+                <div class="kv"><span class="tag">3</span><div><b>Balance Sheet</b> — assets, liabilities, and equity at a specific date.</div></div>
+                <div class="kv"><span class="tag">4</span><div><b>Statement of Cash Flows</b> — cash receipts/payments for a period; operating, investing, financing.</div></div>
+              </div>
+
+              <div class="quiz" style="margin-top:12px;">
+                <div class="q">
+                  <label>Mastery Check: Which statement reports assets, liabilities, and equity at a specific date?</label>
+                  <input id="q_bs" placeholder="Type your answer" />
+                  <div class="row">
+                    <button class="btn primary" onclick="checkBalanceSheet()">Check</button>
+                    <span id="r_bs" class="result"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" id="summary">
+              <h3>Chapter Summary</h3>
+              <div class="kvs">
+                <div class="kv"><span class="tag">1</span><div>Businesses provide goods/services to earn profit; accounting reports economic activity; ethics builds trust.</div></div>
+                <div class="kv"><span class="tag">2</span><div>GAAP guides reporting; useful info is relevant and faithfully represented; assumptions + principles shape reports.</div></div>
+                <div class="kv"><span class="tag">3</span><div>Accounting equation: Assets = Liabilities + Equity.</div></div>
+                <div class="kv"><span class="tag">4</span><div>All transactions can be expressed as changes in the accounting equation.</div></div>
+                <div class="kv"><span class="tag">5</span><div>Statements interrelate: income → retained earnings → balance sheet; ending cash matches balance sheet & cash flows.</div></div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <section class="section" id="comingSoon">
+          <h2 id="comingTitle">Chapters 2–14</h2>
+          <p class="muted" id="comingText">
+            This page is already structured for 14 chapters. When you add Chapter 2+, you’ll paste each chapter’s content into the data structure in the script and the UI will populate automatically.
+          </p>
+        </section>
+
+        <div class="footer">
+          Accounting Master • Built for 14 chapters • Equation tools included • Ready for GitHub deployment
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+<script>
+  // --- Chapters data (14 chapters) ---
+  const chapters = Array.from({length: 14}, (_, i) => {
+    const n = i + 1;
+    return {
+      num: n,
+      title: n === 1 ? "Intro to Accounting & Business" : "(Coming Soon)",
+      status: n === 1 ? "Active" : "Planned",
+      active: n === 1
+    };
+  });
+
+  // --- Render sidebar chapters ---
+  const chapterList = document.getElementById("chapterList");
+  const chapterSelect = document.getElementById("chapterSelect");
+  const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+
+  function renderChapters(){
+    chapterList.innerHTML = "";
+    chapters.forEach(ch => {
+      const btn = document.createElement("button");
+      btn.className = "chapter-btn" + (ch.active ? " active" : "");
+      btn.onclick = () => goChapter(ch.num);
+      btn.innerHTML = `
+        <div class="chapter-num">${ch.num}</div>
+        <div class="chapter-meta">
+          <b>Chapter ${ch.num} — ${escapeHtml(ch.title)}</b>
+          <span>${escapeHtml(ch.status)}</span>
+        </div>
+      `;
+      chapterList.appendChild(btn);
+    });
+  }
+
+  function goHome(){ goChapter(1); }
+
+  function goChapter(n){
+    chapters.forEach(c => c.active = (c.num === n));
+    renderChapters();
+    chapterSelect.value = String(n);
+
+    if(n === 1){
+      document.getElementById("chapter1").style.display = "";
+      document.getElementById("comingSoon").style.display = "";
+      document.getElementById("heroTitle").textContent = "Chapter 1 — Introduction to Accounting & Business";
+      document.getElementById("heroDesc").textContent =
+        "Corporate lesson flow: objectives, definitions, formulas, quizzes, flashcards, plus tools that visually prove the accounting equation always stays balanced.";
+      setComingSoonText(n);
+      scrollTo("hero");
+      return;
+    }
+
+    document.getElementById("chapter1").style.display = "none";
+    document.getElementById("comingSoon").style.display = "";
+    document.getElementById("heroTitle").textContent = `Chapter ${n} — Coming Soon`;
+    document.getElementById("heroDesc").textContent =
+      "This chapter slot is ready. Add lesson content to the data structure later and it will render here.";
+    setComingSoonText(n);
+    scrollTo("hero");
+  }
+
+  function setComingSoonText(n){
+    const t = document.getElementById("comingTitle");
+    const p = document.getElementById("comingText");
+    if(n === 1){
+      t.textContent = "Chapters 2–14";
+      p.textContent = "This page is already structured for 14 chapters. When you add Chapter 2+, paste each chapter’s content into the script data and the UI will populate automatically.";
+    } else {
+      t.textContent = `Chapter ${n} — Coming Soon`;
+      p.textContent = "Add this chapter’s objectives, key terms, practice problems, quizzes, and simulators here later. The navigation and layout are already complete.";
+    }
+  }
+
+  function selectChapterFromDropdown(){
+    const n = parseInt(chapterSelect.value, 10);
+    goChapter(n);
+  }
+
+  function toggleSidebar(){
+    document.body.classList.toggle("sidebar-hidden");
+    sidebarToggleBtn.textContent = document.body.classList.contains("sidebar-hidden") ? "Show Chapters" : "Hide Chapters";
+  }
+
+  // --- Utilities ---
+  function scrollTo(id){
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function copyText(text){
+    navigator.clipboard.writeText(text).then(()=>{ toast("Copied"); }).catch(()=>{ toast("Copy failed"); });
+  }
+
+  let toastTimer = null;
+  function toast(msg){
+    const out = document.getElementById("jeStatus");
+    out.className = "result good";
+    out.textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>{ out.textContent = ""; out.className = "result"; }, 1200);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
+  }
+
+  // --- Existing interactions ---
+  function checkProfit(){
+    const v = (document.getElementById("q_profit").value || "").toLowerCase();
+    const ok = (v.includes("revenue") || v.includes("revenues")) && (v.includes("expense") || v.includes("expenses"));
+    const out = document.getElementById("r_profit");
+    out.textContent = ok ? "Correct" : "Review: Profit = Revenues − Expenses";
+    out.className = "result " + (ok ? "good" : "bad");
+  }
+
+  let fcState = 0;
+  function flipCard(){
+    const card = document.getElementById("fc1");
+    fcState = (fcState + 1) % 2;
+    card.textContent = (fcState === 1)
+      ? "Generally Accepted Accounting Principles"
+      : "Click to Reveal: What does GAAP stand for?";
+  }
+
+  function checkBalanceSheet(){
+    const v = (document.getElementById("q_bs").value || "").toLowerCase();
+    const ok = v.includes("balance");
+    const out = document.getElementById("r_bs");
+    out.textContent = ok ? "Correct" : "Answer: Balance Sheet";
+    out.className = "result " + (ok ? "good" : "bad");
+  }
+
+  let studyMode = false;
+  function toggleStudyMode(){
+    studyMode = !studyMode;
+    document.documentElement.style.setProperty("--bg", studyMode ? "#ffffff" : "#f5f7fa");
+    document.documentElement.style.setProperty("--surface2", studyMode ? "#ffffff" : "#f1f5f9");
+    toast(studyMode ? "Study Mode On" : "Study Mode Off");
+  }
+
+  function openMastery(){ scrollTo("obj5"); }
+
+  // ==========================
+  // Equation Visualizer (Sliders)
+  // ==========================
+  let autoBalance = true;
+  const assetsSlider = document.getElementById("assetsSlider");
+  const liabSlider = document.getElementById("liabSlider");
+  const eqSlider = document.getElementById("eqSlider");
+  const splitSlider = document.getElementById("splitSlider");
+
+  function money(n){
+    const sign = n > 0 ? "+" : (n < 0 ? "−" : "");
+    const abs = Math.abs(n);
+    return sign + "$" + abs.toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+
+  function updateSplitLabel(){
+    const s = parseInt(splitSlider.value,10);
+    document.getElementById("splitLabel").textContent = `${s}% L / ${100-s}% E`;
+  }
+
+  function toggleAutoBalance(){
+    autoBalance = !autoBalance;
+    document.getElementById("abStatus").textContent = autoBalance ? "ON" : "OFF";
+    document.getElementById("eqHint").textContent = autoBalance
+      ? "Auto-Balance is ON. Change Assets; Liabilities and Equity will follow."
+      : "Auto-Balance is OFF. Adjust any slider. Balance is checked live.";
+    if(autoBalance) syncFromAssets();
+    updateEqViz();
+  }
+
+  function resetSliders(){
+    assetsSlider.value = 0;
+    liabSlider.value = 0;
+    eqSlider.value = 0;
+    splitSlider.value = 50;
+    updateSplitLabel();
+    updateEqViz();
+  }
+
+  function clampToStep(val, min, max, step){
+    let v = Math.max(min, Math.min(max, val));
+    v = Math.round(v / step) * step;
+    return v;
+  }
+
+  function syncFromAssets(){
+    const A = parseInt(assetsSlider.value,10);
+    if(autoBalance){
+      const split = parseInt(splitSlider.value,10) / 100;
+      const L = Math.round((A * split) / 50) * 50;
+      const E = A - L;
+      liabSlider.value = clampToStep(L, -5000, 5000, 50);
+      eqSlider.value = clampToStep(E, -5000, 5000, 50);
+    }
+    updateEqViz();
+  }
+
+  function manualChange(){
+    if(autoBalance){
+      autoBalance = false;
+      document.getElementById("abStatus").textContent = "OFF";
+      document.getElementById("eqHint").textContent = "Auto-Balance turned OFF because you adjusted Liabilities/Equity manually.";
+    }
+    updateEqViz();
+  }
+
+  function updateEqViz(){
+    const A = parseInt(assetsSlider.value,10);
+    const L = parseInt(liabSlider.value,10);
+    const E = parseInt(eqSlider.value,10);
+
+    document.getElementById("aVal").textContent = money(A);
+    document.getElementById("lVal").textContent = money(L);
+    document.getElementById("eVal").textContent = money(E);
+
+    document.getElementById("eqLine").textContent = `ΔA (${money(A)}) = ΔL (${money(L)}) + ΔE (${money(E)})`;
+
+    const balanced = (A === (L + E));
+    const status = document.getElementById("eqStatus");
+    status.textContent = balanced ? "Balanced ✅" : "Not Balanced ❌";
+    status.style.color = balanced ? "var(--good)" : "var(--bad)";
+  }
+
+  // ==========================
+  // Journal Entries Tool
+  // ==========================
+  let J = { A: 0, L: 0, E: 0, entries: [] };
+
+  function applyDelta(dA, dL, dE){
+    J.A += dA;
+    J.L += dL;
+    J.E += dE;
+  }
+
+  function fmtMoney(n){
+    const sign = n < 0 ? "−" : "";
+    const abs = Math.abs(n);
+    return sign + "$" + abs.toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+
+  function typeEffectOnALE(type, side, amount){
+    const isDebit = (side === "D");
+    let dA=0,dL=0,dE=0;
+
+    switch(type){
+      case "Asset":
+        dA += (isDebit ? +1 : -1) * amount;
+        break;
+      case "Liability":
+        dL += (isDebit ? -1 : +1) * amount;
+        break;
+      case "Equity":
+        dE += (isDebit ? -1 : +1) * amount;
+        break;
+      case "Revenue":
+        dE += (isDebit ? -1 : +1) * amount;
+        break;
+      case "Expense":
+        dE += (isDebit ? -1 : +1) * amount;
+        break;
+      case "Dividends":
+        dE += (isDebit ? -1 : +1) * amount;
+        break;
+    }
+    return {dA,dL,dE};
+  }
+
+  function addEntry(){
+    const debit = document.getElementById("debitType").value;
+    const credit = document.getElementById("creditType").value;
+    const amt = parseFloat(document.getElementById("jeAmount").value || "0");
+    const status = document.getElementById("jeStatus");
+
+    if(!amt || amt <= 0){
+      status.textContent = "Enter an amount.";
+      status.className = "result warn";
+      return;
+    }
+
+    const d1 = typeEffectOnALE(debit, "D", amt);
+    const d2 = typeEffectOnALE(credit, "C", amt);
+
+    const dA = d1.dA + d2.dA;
+    const dL = d1.dL + d2.dL;
+    const dE = d1.dE + d2.dE;
+
+    applyDelta(dA,dL,dE);
+    J.entries.push({debit, credit, amt, dA, dL, dE});
+
+    renderJournal();
+    status.textContent = "Entry added.";
+    status.className = "result good";
+    document.getElementById("jeAmount").value = "";
+  }
+
+  function undoEntry(){
+    const status = document.getElementById("jeStatus");
+    if(J.entries.length === 0){
+      status.textContent = "Nothing to undo.";
+      status.className = "result warn";
+      return;
+    }
+    const last = J.entries.pop();
+    applyDelta(-last.dA, -last.dL, -last.dE);
+    renderJournal();
+    status.textContent = "Undid last entry.";
+    status.className = "result good";
+  }
+
+  function resetJournal(){
+    J = {A:0,L:0,E:0,entries:[]};
+    renderJournal();
+    const status = document.getElementById("jeStatus");
+    status.textContent = "Reset.";
+    status.className = "result good";
+  }
+
+  function fmtSigned(n){
+    const sign = n > 0 ? "+" : (n < 0 ? "−" : "");
+    const abs = Math.abs(n);
+    return sign + "$" + abs.toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+
+  function renderJournal(){
+    document.getElementById("balA").textContent = fmtMoney(J.A);
+    document.getElementById("balL").textContent = fmtMoney(J.L);
+    document.getElementById("balE").textContent = fmtMoney(J.E);
+
+    document.getElementById("balEqLine").textContent = `A (${fmtMoney(J.A)}) = L (${fmtMoney(J.L)}) + E (${fmtMoney(J.E)})`;
+
+    const balanced = (J.A === (J.L + J.E));
+    const status = document.getElementById("jeStatus");
+    if(J.entries.length > 0 && !balanced){
+      status.textContent = "Warning: Not balanced (check account types).";
+      status.className = "result bad";
+    }
+
+    const body = document.getElementById("jeBody");
+    body.innerHTML = "";
+    if(J.entries.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="7" style="color:var(--muted);">No entries yet.</td>`;
+      body.appendChild(tr);
+      return;
+    }
+
+    J.entries.forEach((e, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">${idx+1}</td>
+        <td>${escapeHtml(e.debit)}</td>
+        <td>${escapeHtml(e.credit)}</td>
+        <td class="mono">${fmtMoney(e.amt)}</td>
+        <td class="mono">${fmtSigned(e.dA)}</td>
+        <td class="mono">${fmtSigned(e.dL)}</td>
+        <td class="mono">${fmtSigned(e.dE)}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  // Init
+  renderChapters();
+  goHome();
+  updateSplitLabel();
+  resetSliders();
+  renderJournal();
+</script>
+
+</body>
+</html>
